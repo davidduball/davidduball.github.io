@@ -1,5 +1,1 @@
-/my-project
-  /index.html
-  /netlify
-    /functions
-      score-calculation.js
+score-calculation.js
