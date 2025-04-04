@@ -1,7 +1,7 @@
 body {
-  background-color: #f4f4f4;
+  background-color: white; /* Set background to white */
   color: #333;
-  font-family: Arial, sans-serif;
+  font-family: "Times New Roman", serif; /* Change font to Times New Roman */
   padding: 20px;
 }
 
@@ -59,3 +59,4 @@ input[type="submit"]:hover {
   font-weight: bold;
   color: #e74c3c;
 }
+
