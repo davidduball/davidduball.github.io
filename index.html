@@ -12,53 +12,49 @@
     </header>
 
     <a href="responsecollector.html">Response Collector</a>
-
     <a href="form_submission.html">Form Submission</a>
 
-    <!-- index.html -->
-<form name="golf-form" method="POST" data-netlify="true" onsubmit="submitForm(event)">
-  <label for="name">Your Name:</label>
-  <input type="text" id="name" name="name" required />
+    <form name="golf-form" method="POST" data-netlify="true" onsubmit="submitForm(event)">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required />
 
-  <label for="team">Choose Your 8 Golfers (comma-separated):</label>
-  <input type="text" id="team" name="team" required />
+        <label for="team">Choose Your 8 Golfers (comma-separated):</label>
+        <input type="text" id="team" name="team" required />
 
-  <label for="prop-answers">Your Prop Question Answers:</label>
-  <textarea id="prop-answers" name="prop-answers" required></textarea>
+        <label for="prop-answers">Your Prop Question Answers:</label>
+        <textarea id="prop-answers" name="prop-answers" required></textarea>
 
-  <button type="submit">Submit</button>
-</form>
+        <button type="submit">Submit</button>
+    </form>
 
-<script>
-  async function submitForm(event) {
-    event.preventDefault();  // Prevent the form from submitting the traditional way
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();  // Prevent the form from submitting the traditional way
 
-    // Collect form data
-    const formData = new FormData(event.target);
-    const data = {
-      name: formData.get('name'),
-      team: formData.get('team'),
-      propAnswers: formData.get('prop-answers'),
-    };
+            // Collect form data
+            const formData = new FormData(event.target);
+            const data = {
+                name: formData.get('name'),
+                team: formData.get('team'),
+                propAnswers: formData.get('prop-answers'),
+            };
 
-    // Send form data to Netlify function
-    const response = await fetch('/.netlify/functions/score-calculation', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+            // Send form data to Netlify function
+            const response = await fetch('/.netlify/functions/score-calculation', {
+                method: 'POST',
+                body: JSON.stringify(data),
+            });
 
-    // Parse the result from the serverless function
-    const result = await response.json();
-    
-    // Display the result (e.g., show score on the page)
-    alert(`Hello ${result.name}, your team score is: ${result.score}`);
-  }
+            // Parse the result from the serverless function
+            const result = await response.json();
 
-  // Attach submit handler to form
-  document.querySelector('form').addEventListener('submit', submitForm);
-</script>
+            // Display the result (e.g., show score on the page)
+            alert(`Hello ${result.name}, your team score is: ${result.score}`);
+        }
 
-
+        // Attach submit handler to form
+        document.querySelector('form').addEventListener('submit', submitForm);
+    </script>
 
     <footer>
         <p>&copy; 2025 Your Name</p>
