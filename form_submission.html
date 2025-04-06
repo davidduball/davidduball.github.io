@@ -3,89 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Submission Tool</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
+    <title>Form Submission</title>
 </head>
 <body>
-    <h1>Submit Your Information</h1>
+    <header>
+        <h1>Submit Your Golf Tournament Entry</h1>
+    </header>
 
-    <form id="submissionForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        
-        <label for="message">Message:</label>
-        <textarea id="message" name="message" required></textarea>
-        
-        <button type="submit">Submit</button>
-    </form>
+    <form name="golf-form" method="POST" data-netlify="true" onsubmit="submitForm(event)">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required />
 
-    <div id="responseMessage"></div>
+        <label for="team">Choose Your 8 Golfers (comma-separated):</label>
+        <input type="text" id="team" name="team" required />
 
-    <script src="script.js"></script>
+        <!-- Section 1: Multiple Choice Questions -->
+        <fieldset>
+            <legend>Section 1: Choose Your Answers</legend>
+            <label for="question1">Which golfer will have the lowest score on Day 1?</label>
+            <div>
+                <input type="radio" id="question1a" name="question1" value="Golfer A" required />
+                <label for="question1a">Golfer A</label>
+            </div>
+            <div>
+                <input type="radio" id="question1b" name="question1" value="Golfer B" />
+                <label for="question1b">Golfer B</label>
+            </div>
+            <div>
+                <input type="radio" id="question1c" name="question1" value="Golfer C" />
+                <label for="question1c">Golfer C</label>
+            </div>
+        </fieldset>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Submission Tool</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>Submit Your Information</h1>
-
-    <form action="https://formspree.io/f/your-form-id" method="POST" id="submissionForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-
-        <label for="message">Message:</label>
-        <textarea id="message" name="message" required></textarea>
-
-        <button type="submit">Submit</button>
-    </form>
-
-    <div id="responseMessage"></div>
-
-    <script src="script.js"></script>
-</body>
-</html>
-
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Submission Tool</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>Submit Your Information</h1>
-
-    <form action="https://formspree.io/f/your-form-id" method="POST" id="submissionForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-
-        <label for="message">Message:</label>
-        <textarea id="message" name="message" required></textarea>
+        <!-- Section 2: Multiple Choice Questions -->
+        <fieldset>
+            <legend>Section 2: Choose Your Answers</legend>
+            <label for="question2">Which golfer will have the most birdies?</label>
+            <div>
+                <input type="radio" id="question2a" name="question2" value="Golfer A" required />
+                <label for="question2a">Golfer A</label>
+            </div>
+            <div>
+                <input type="radio" id="question2b" name="question2" value="Golfer B" />
+                <label for="question2b">Golfer B</label>
+            </div>
+            <div>
+                <input type="radio" id="question2c" name="question2" value="Golfer C" />
+                <label for="question2c">Golfer C</label>
+            </div>
+        </fieldset>
 
         <button type="submit">Submit</button>
     </form>
 
-    <div id="responseMessage"></div>
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();  // Prevent the form from submitting the traditional way
 
-    <script src="script.js"></script>
-</body>
-</html>
+            // Collect form data
+            const formData = new FormData(event.target);
+            const data = {
+                name: formData.get('name'),
+                team: formData.get('team'),
+                question1: formData.get('question1'),
+                question2: formData.get('question2')
+            };
 
+            // Send form data to Netlify function
+            const response = await fetch('/.netlify/functions/score-calculation', {
+                method: 'POST',
+                body: JSON.stringify(data),
+            });
 
+            // Parse the result from the serverless function
+            const result = await response.json();
+            
+            // Display the result (e.g., show score on the page)
+            alert(`Hello ${result.name}, your team score is: ${result.score}`);
+        }
+
+        // Attach submit handler to form
+        document.querySelector('form').addEventListener('submit', submitForm);
+    </script>
+
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
 </body>
 </html>
