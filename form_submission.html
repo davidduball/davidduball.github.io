@@ -1,119 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css" />
-    <title>Form Submission</title>
-</head>
-<body>
-    <header>
-        <h1>Submit Your Golf Tournament Entry</h1>
-    </header>
+<form name="golf-form" method="POST" data-netlify="true">
+    <label for="name">Your Name:</label>
+    <input type="text" id="name" name="name" required />
 
-    <form name="golf-form" method="POST" data-netlify="true" onsubmit="submitForm(event)">
-        <label for="name">Your Name:</label>
-        <input type="text" id="name" name="name" required />
+    <label for="team">Choose Your 8 Golfers (comma-separated):</label>
+    <input type="text" id="team" name="team" required />
 
-        <label for="team">Choose Your 8 Golfers (comma-separated):</label>
-        <input type="text" id="team" name="team" required />
+    <!-- Section 1: Multiple Choice Questions -->
+    <fieldset>
+        <legend>Section 1: Choose Your Answers</legend>
+        <label for="question1">Which golfer will have the lowest score on Day 1?</label>
+        <div>
+            <input type="radio" id="question1a" name="question1" value="Golfer A" required />
+            <label for="question1a">Golfer A</label>
+        </div>
+        <div>
+            <input type="radio" id="question1b" name="question1" value="Golfer B" />
+            <label for="question1b">Golfer B</label>
+        </div>
+        <div>
+            <input type="radio" id="question1c" name="question1" value="Golfer C" />
+            <label for="question1c">Golfer C</label>
+        </div>
+    </fieldset>
 
-        <!-- Section 1: Multiple Choice Questions -->
-        <fieldset>
-            <legend>Section 1: Choose Your Answers</legend>
-            <label for="question1">Which golfer will have the lowest score on Day 1?</label>
-            <div>
-                <input type="radio" id="question1a" name="question1" value="Golfer A" required />
-                <label for="question1a">Golfer A</label>
-            </div>
-            <div>
-                <input type="radio" id="question1b" name="question1" value="Golfer B" />
-                <label for="question1b">Golfer B</label>
-            </div>
-            <div>
-                <input type="radio" id="question1c" name="question1" value="Golfer C" />
-                <label for="question1c">Golfer C</label>
-            </div>
-        </fieldset>
-
-        <!-- Section 2: Multiple Choice Questions -->
-        <fieldset>
-            <legend>Section 2: Choose Your Answers</legend>
-            <label for="question2">Which golfer will have the most birdies?</label>
-            <div>
-                <input type="radio" id="question2a" name="question2" value="Golfer A" required />
-                <label for="question2a">Golfer A</label>
-            </div>
-            <div>
-                <input type="radio" id="question2b" name="question2" value="Golfer B" />
-                <label for="question2b">Golfer B</label>
-            </div>
-            <div>
-                <input type="radio" id="question2c" name="question2" value="Golfer C" />
-                <label for="question2c">Golfer C</label>
-            </div>
-        </fieldset>
-
-        <button type="submit">Submit</button>
-    </form>
-
+    <!-- Section 2: Multiple Choice Questions -->
+    <fieldset>
+        <legend>Section 2: Choose Your Answers</legend>
+        <label for="question2">Which golfer will have the most birdies?</label>
+        <div>
+            <input type="radio" id="question2a" name="question2" value="Golfer A" required />
+            <label for="question2a">Golfer A</label>
+        </div>
+        <div>
+            <input type="radio" id="question2b" name="question2" value="Golfer B" />
+            <label for="question2b">Golfer B</label>
+        </div>
+        <div>
+            <input type="radio" id="question2c" name="question2" value="Golfer C" />
+            <label for="question2c">Golfer C</label>
+        </div>
+        
     <!-- Placeholder for confirmation message -->
-    <div id="confirmation-message" style="display: none; background-color: #2ecc71; color: white; padding: 10px; margin-top: 20px; text-align: center;">
-        Your submission has been received. Thank you for participating!
-    </div>
+<div id="confirmation-message" style="display: none; background-color: #2ecc71; color: white; padding: 10px; margin-top: 20px; text-align: center;">
+    Your submission has been received. Thank you for participating!
+</div>
 
-    <script>
-        async function submitForm(event) {
-            event.preventDefault();  // Prevent the form from submitting the traditional way
+<!-- Add a simple JavaScript function to show the confirmation message -->
+<script>
+    window.onload = () => {
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const form = document.querySelector('form');
+        
+        form.addEventListener('submit', () => {
+            confirmationMessage.style.display = 'block'; // Show confirmation message after form submit
+        });
+    };
+</script>
 
-            // Collect form data
-            const formData = new FormData(event.target);
-            const data = {
-                name: formData.get('name'),
-                team: formData.get('team'),
-                question1: formData.get('question1'),
-                question2: formData.get('question2')
-            };
+    </fieldset>
 
-            // Disable the form while submitting to prevent duplicate submissions
-            const form = document.querySelector('form');
-            form.querySelector('button').disabled = true;
-
-            try {
-                // Send form data to Netlify function
-                const response = await fetch('/.netlify/functions/score-calculation', {
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Submission failed');
-                }
-
-                // Parse the result from the serverless function
-                const result = await response.json();
-
-                // Show the confirmation message
-                const confirmationMessage = document.getElementById('confirmation-message');
-                confirmationMessage.style.display = 'block';
-
-                // Optionally display the score or a custom message
-                alert(`Hello ${result.name}, your team score is: ${result.score}`);
-            } catch (error) {
-                // Handle any errors
-                alert('There was an error with your submission. Please try again later.');
-
-                // Re-enable the form button
-                form.querySelector('button').disabled = false;
-            }
-        }
-
-        // Attach submit handler to form
-        document.querySelector('form').addEventListener('submit', submitForm);
-    </script>
-
-    <footer>
-        <p>&copy; 2025 Your Name</p>
-    </footer>
-</body>
-</html>
+    <button type="submit">Submit</button>
+</form>
