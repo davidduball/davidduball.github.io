@@ -1,8 +1,9 @@
 body {
   background-color: #f9e79f; /* A softer, more subdued yellow */
   color: #333;
-  font-family: "Times New Roman", serif; /* Change font to Times New Roman */
+  font-family: "Times New Roman", serif; /* Serif font */
   padding: 20px;
+  margin: 0;
 }
 
 h1 {
@@ -60,3 +61,27 @@ input[type="submit"]:hover {
   color: #e74c3c;
 }
 
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+
+  label {
+    font-size: 1em;
+  }
+
+  input[type="text"], textarea, input[type="submit"] {
+    font-size: 1em;
+    padding: 8px;
+  }
+}
