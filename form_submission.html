@@ -1,63 +1,68 @@
-<form name="golf-form" method="POST" data-netlify="true">
-    <label for="name">Your Name:</label>
-    <input type="text" id="name" name="name" required />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css" />
+    <title>Form Submission</title>
+</head>
+<body>
+    <header>
+        <h1>Submit Your Golf Tournament Entry</h1>
+    </header>
 
-    <label for="team">Choose Your 8 Golfers (comma-separated):</label>
-    <input type="text" id="team" name="team" required />
+    <!-- Form container where questions will be inserted dynamically -->
+    <form id="golf-form" name="golf-form" method="POST" data-netlify="true">
+        <div id="questions-container"></div>  <!-- Dynamic content will be inserted here -->
+        <button type="submit">Submit</button>
+    </form>
 
-    <!-- Section 1: Multiple Choice Questions -->
-    <fieldset>
-        <legend>Section 1: Choose Your Answers</legend>
-        <label for="question1">Which golfer will have the lowest score on Day 1?</label>
-        <div>
-            <input type="radio" id="question1a" name="question1" value="Golfer A" required />
-            <label for="question1a">Golfer A</label>
-        </div>
-        <div>
-            <input type="radio" id="question1b" name="question1" value="Golfer B" />
-            <label for="question1b">Golfer B</label>
-        </div>
-        <div>
-            <input type="radio" id="question1c" name="question1" value="Golfer C" />
-            <label for="question1c">Golfer C</label>
-        </div>
-    </fieldset>
+    <script>
+        // Fetch the JSON file with questions
+        async function loadQuestions() {
+            try {
+                const response = await fetch('questions.json');  // Path to your JSON file
+                const data = await response.json();
 
-    <!-- Section 2: Multiple Choice Questions -->
-    <fieldset>
-        <legend>Section 2: Choose Your Answers</legend>
-        <label for="question2">Which golfer will have the most birdies?</label>
-        <div>
-            <input type="radio" id="question2a" name="question2" value="Golfer A" required />
-            <label for="question2a">Golfer A</label>
-        </div>
-        <div>
-            <input type="radio" id="question2b" name="question2" value="Golfer B" />
-            <label for="question2b">Golfer B</label>
-        </div>
-        <div>
-            <input type="radio" id="question2c" name="question2" value="Golfer C" />
-            <label for="question2c">Golfer C</label>
-        </div>
-        
-    <!-- Placeholder for confirmation message -->
-<div id="confirmation-message" style="display: none; background-color: #2ecc71; color: white; padding: 10px; margin-top: 20px; text-align: center;">
-    Your submission has been received. Thank you for participating!
-</div>
+                const formContainer = document.getElementById('questions-container');
+                data.questions.forEach((q, index) => {
+                    const fieldset = document.createElement('fieldset');
+                    const legend = document.createElement('legend');
+                    legend.innerText = `Section ${index + 1}: Choose Your Answer`;
+                    fieldset.appendChild(legend);
 
-<!-- Add a simple JavaScript function to show the confirmation message -->
-<script>
-    window.onload = () => {
-        const confirmationMessage = document.getElementById('confirmation-message');
-        const form = document.querySelector('form');
-        
-        form.addEventListener('submit', () => {
-            confirmationMessage.style.display = 'block'; // Show confirmation message after form submit
-        });
-    };
-</script>
+                    const questionLabel = document.createElement('label');
+                    questionLabel.setAttribute('for', q.name);
+                    questionLabel.innerText = q.question;
+                    fieldset.appendChild(questionLabel);
 
-    </fieldset>
+                    // Create options for the radio buttons
+                    q.options.forEach(option => {
+                        const div = document.createElement('div');
+                        const input = document.createElement('input');
+                        input.type = 'radio';
+                        input.name = q.name;
+                        input.value = option;
+                        const label = document.createElement('label');
+                        label.innerText = option;
+                        div.appendChild(input);
+                        div.appendChild(label);
+                        fieldset.appendChild(div);
+                    });
 
-    <button type="submit">Submit</button>
-</form>
+                    formContainer.appendChild(fieldset);
+                });
+            } catch (error) {
+                console.error('Error loading questions:', error);
+            }
+        }
+
+        // Load the questions when the page loads
+        window.onload = loadQuestions;
+    </script>
+
+    <footer>
+        <p>&copy; 2025 Your Name</p>
+    </footer>
+</body>
+</html>
