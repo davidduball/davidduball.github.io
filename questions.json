@@ -1,0 +1,14 @@
+{
+  "questions": [
+    {
+      "question": "Which golfer will have the lowest score on Day 1?",
+      "name": "question1",
+      "options": ["Golfer A", "Golfer B", "Golfer C"]
+    },
+    {
+      "question": "Which golfer will have the most birdies?",
+      "name": "question2",
+      "options": ["Golfer A", "Golfer B", "Golfer C"]
+    }
+  ]
+}
