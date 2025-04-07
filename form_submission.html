@@ -31,7 +31,7 @@
         // Function to fetch the questions from the JSON file
         async function fetchQuestions() {
             try {
-                const response = await fetch('questions.json'); // The URL to your JSON file
+                const response = await fetch('golf.json'); // The URL to your JSON file
                 const questionData = await response.json();
                 renderQuestions(questionData);
             } catch (error) {
