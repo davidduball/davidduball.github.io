@@ -3,66 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Tournament Entry Form</title>
     <link rel="stylesheet" href="styles.css" />
-    <title>Form Submission</title>
 </head>
 <body>
     <header>
         <h1>Submit Your Golf Tournament Entry</h1>
     </header>
 
-    <!-- Form container where questions will be inserted dynamically -->
-    <form id="golf-form" name="golf-form" method="POST" data-netlify="true">
-        <div id="questions-container"></div>  <!-- Dynamic content will be inserted here -->
+    <form name="golf-form" method="POST" data-netlify="true" onsubmit="submitForm(event)">
+        <div id="questions"></div>
         <button type="submit">Submit</button>
     </form>
 
     <script>
-        // Fetch the JSON file with questions
-        async function loadQuestions() {
-            try {
-                const response = await fetch('questions.json');  // Path to your JSON file
-                const data = await response.json();
-
-                const formContainer = document.getElementById('questions-container');
-                data.questions.forEach((q, index) => {
-                    const fieldset = document.createElement('fieldset');
-                    const legend = document.createElement('legend');
-                    legend.innerText = `Section ${index + 1}: Choose Your Answer`;
-                    fieldset.appendChild(legend);
-
-                    const questionLabel = document.createElement('label');
-                    questionLabel.setAttribute('for', q.name);
-                    questionLabel.innerText = q.question;
-                    fieldset.appendChild(questionLabel);
-
-                    // Create options for the radio buttons
-                    q.options.forEach(option => {
-                        const div = document.createElement('div');
-                        const input = document.createElement('input');
-                        input.type = 'radio';
-                        input.name = q.name;
-                        input.value = option;
-                        const label = document.createElement('label');
-                        label.innerText = option;
-                        div.appendChild(input);
-                        div.appendChild(label);
-                        fieldset.appendChild(div);
-                    });
-
-                    formContainer.appendChild(fieldset);
-                });
-            } catch (error) {
-                console.error('Error loading questions:', error);
+        // Your JSON data
+        const questionData = [
+            {
+                "category": "Choose 1",
+                "instruction": "Pick 1 golfer from this group.",
+                "players": [
+                    { "name": "Scottie Scheffler", "odds": "+350" },
+                    { "name": "Rory McIlroy", "odds": "+650" }
+                ]
+            },
+            {
+                "category": "Choose 2",
+                "instruction": "Pick 2 golfers from this group.",
+                "players": [
+                    { "name": "Hideki Matsuyama", "odds": "+2800" },
+                    { "name": "Brooks Koepka", "odds": "+2800" }
+                ]
             }
+            // Add the rest of your categories and players here.
+        ];
+
+        // Function to render the questions dynamically
+        function renderQuestions() {
+            const questionsContainer = document.getElementById('questions');
+            
+            questionData.forEach((categoryData, index) => {
+                // Create a fieldset for each category
+                const fieldset = document.createElement('fieldset');
+                const legend = document.createElement('legend');
+                legend.textContent = categoryData.category;
+                fieldset.appendChild(legend);
+
+                // Add instruction for each category
+                const instruction = document.createElement('p');
+                instruction.textContent = categoryData.instruction;
+                fieldset.appendChild(instruction);
+
+                // Create radio buttons for each player
+                categoryData.players.forEach(player => {
+                    const div = document.createElement('div');
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.id = player.name;
+                    input.name = `question${index + 1}`;  // Each question needs a unique name for radio buttons
+                    input.value = player.name;
+                    const label = document.createElement('label');
+                    label.setAttribute('for', player.name);
+                    label.textContent = `${player.name} (${player.odds})`;
+
+                    div.appendChild(input);
+                    div.appendChild(label);
+                    fieldset.appendChild(div);
+                });
+
+                // Append the category fieldset to the questions container
+                questionsContainer.appendChild(fieldset);
+            });
         }
 
-        // Load the questions when the page loads
-        window.onload = loadQuestions;
-    </script>
+        // Call the renderQuestions function when the page loads
+        window.onload = renderQuestions;
 
-    <footer>
-        <p>&copy; 2025 Your Name</p>
-    </footer>
+        // Function to handle form submission (you may need to modify this as per your backend or Netlify)
+        async function submitForm(event) {
+            event.preventDefault();  // Prevent form from submitting the traditional way
+
+            const formData = new FormData(event.target);
+            const data = {
+                name: formData.get('name'),
+                team: formData.get('team'),
+                // Add more fields as necessary
+            };
+
+            // You can process the form data or send it to your server
+            console.log(data);
+        }
+    </script>
 </body>
 </html>
