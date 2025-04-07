@@ -12,6 +12,16 @@
     </header>
 
     <form name="golf-form" method="POST" data-netlify="true" onsubmit="submitForm(event)">
+        <!-- Input fields for name and team -->
+        <div>
+            <label for="name">Your Name:</label>
+            <input type="text" id="name" name="name" required />
+        </div>
+        <div>
+            <label for="team">Team Name:</label>
+            <input type="text" id="team" name="team" required />
+        </div>
+
         <div id="questions"></div>
         <button type="submit">Submit</button>
     </form>
@@ -19,7 +29,8 @@
     <script>
         // Your JSON data
         const questionData = [
-            {
+
+{
   "category": "Choose 1",
   "instruction": "Pick 1 golfer from this group.",
   "players": [
@@ -179,8 +190,10 @@
     { "name": "Jose Maria Olazabal", "odds": "+200000" },
     { "name": "Vijay Singh", "odds": "+200000" },
     { "name": "Mike Weir", "odds": "+200000" }
-  ]
-}
+  ]    
+            },
+            // ... (Other categories here)
+        ];
 
         // Function to render the questions dynamically
         function renderQuestions() {
@@ -223,7 +236,7 @@
         // Call the renderQuestions function when the page loads
         window.onload = renderQuestions;
 
-        // Function to handle form submission (you may need to modify this as per your backend or Netlify)
+        // Function to handle form submission
         async function submitForm(event) {
             event.preventDefault();  // Prevent form from submitting the traditional way
 
@@ -231,10 +244,18 @@
             const data = {
                 name: formData.get('name'),
                 team: formData.get('team'),
-                // Add more fields as necessary
+                selectedGolfers: []
             };
 
-            // You can process the form data or send it to your server
+            // Collect selected golfers from the radio buttons
+            questionData.forEach((categoryData, index) => {
+                const selectedPlayer = formData.get(`question${index + 1}`);
+                if (selectedPlayer) {
+                    data.selectedGolfers.push(selectedPlayer);
+                }
+            });
+
+            // Log the collected data to the console
             console.log(data);
         }
     </script>
