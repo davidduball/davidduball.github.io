@@ -1,14 +1,167 @@
 {
-  "questions": [
+  "directions": "Please select 8 golfers from the list below. For each category, choose the required number of golfers as indicated. The goal is to pick a team with the lowest total score after 4 rounds.",
+  "categories": [
     {
-      "question": "Which golfer will have the lowest score on Day 1?",
-      "name": "question1",
-      "options": ["Golfer A", "Golfer B", "Golfer C"]
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Scottie Scheffler", "odds": "+350" },
+        { "name": "Rory McIlroy", "odds": "+650" }
+      ]
     },
     {
-      "question": "Which golfer will have the most birdies?",
-      "name": "question2",
-      "options": ["Golfer A", "Golfer B", "Golfer C"]
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Jon Rahm", "odds": "+1300" },
+        { "name": "Ludvig Åberg", "odds": "+1600" },
+        { "name": "Xander Schauffele", "odds": "+1800" },
+        { "name": "Collin Morikawa", "odds": "+1800" },
+        { "name": "Bryson DeChambeau", "odds": "+2000" },
+        { "name": "Justin Thomas", "odds": "+2200" }
+      ]
+    },
+    {
+      "category": "Choose 2",
+      "instruction": "Pick 2 golfers from this group.",
+      "players": [
+        { "name": "Hideki Matsuyama", "odds": "+2800" },
+        { "name": "Brooks Koepka", "odds": "+2800" },
+        { "name": "Joaquin Niemann", "odds": "+2800" },
+        { "name": "Jordan Spieth", "odds": "+3000" },
+        { "name": "Tommy Fleetwood", "odds": "+3500" },
+        { "name": "Tyrrell Hatton", "odds": "+3500" },
+        { "name": "Viktor Hovland", "odds": "+3500" },
+        { "name": "Patrick Cantlay", "odds": "+4000" },
+        { "name": "Will Zalatoris", "odds": "+4500" },
+        { "name": "Shane Lowry", "odds": "+4500" },
+        { "name": "Cameron Smith", "odds": "+5000" },
+        { "name": "Min Woo Lee", "odds": "+5500" },
+        { "name": "Russell Henley", "odds": "+5500" },
+        { "name": "Robert MacIntyre", "odds": "+6000" },
+        { "name": "Sergio Garcia", "odds": "+6500" },
+        { "name": "Akshay Bhatia", "odds": "+6500" }
+      ]
+    },
+    {
+      "category": "Choose 2",
+      "instruction": "Pick 2 golfers from this group.",
+      "players": [
+        { "name": "Tony Finau", "odds": "+7000" },
+        { "name": "Corey Conners", "odds": "+7000" },
+        { "name": "Sepp Straka", "odds": "+7500" },
+        { "name": "Jason Day", "odds": "+7500" },
+        { "name": "Wyndham Clark", "odds": "+8000" },
+        { "name": "Sam Burns", "odds": "+9000" },
+        { "name": "Tom Kim", "odds": "+9000" }
+      ]
+    },
+    {
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Dustin Johnson", "odds": "+10000" },
+        { "name": "Patrick Reed", "odds": "+10000" },
+        { "name": "Keegan Bradley", "odds": "+10000" },
+        { "name": "Sahith Theegala", "odds": "+10000" },
+        { "name": "Sungjae Im", "odds": "+10000" },
+        { "name": "Denny McCarthy", "odds": "+10000" },
+        { "name": "Daniel Berger", "odds": "+10000" },
+        { "name": "Adam Scott", "odds": "+11000" }
+      ]
+    },
+    {
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Justin Rose", "odds": "+11000" },
+        { "name": "Davis Thompson", "odds": "+11000" },
+        { "name": "Aaron Rai", "odds": "+11000" },
+        { "name": "Byeong-Hun An", "odds": "+12000" },
+        { "name": "Lucas Glover", "odds": "+12000" },
+        { "name": "Matt Fitzpatrick", "odds": "+13000" },
+        { "name": "Taylor Pendrith", "odds": "+13000" },
+        { "name": "Michael Kim", "odds": "+13000" }
+      ]
+    },
+    {
+      "category": "Choose 2",
+      "instruction": "Pick 2 golfers from this group.",
+      "players": [
+        { "name": "J.J. Spaun", "odds": "+13000" },
+        { "name": "Thomas Detry", "odds": "+15000" },
+        { "name": "Maverick McNealy", "odds": "+15000" },
+        { "name": "Billy Horschel", "odds": "+17000" },
+        { "name": "Rasmus Højgaard", "odds": "+17000" },
+        { "name": "Laurie Canter", "odds": "+17000" },
+        { "name": "Nicolai Højgaard", "odds": "+17000" },
+        { "name": "Brian Harman", "odds": "+18000" },
+        { "name": "Harris English", "odds": "+18000" },
+        { "name": "Stephan Jaeger", "odds": "+18000" },
+        { "name": "Phil Mickelson", "odds": "+20000" },
+        { "name": "Cameron Young", "odds": "+20000" },
+        { "name": "Max Homa", "odds": "+20000" },
+        { "name": "J.T. Poston", "odds": "+20000" }
+      ]
+    },
+    {
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Nick Taylor", "odds": "+20000" },
+        { "name": "Max Greyserman", "odds": "+20000" },
+        { "name": "Cam Davis", "odds": "+25000" },
+        { "name": "Joe Highsmith", "odds": "+25000" },
+        { "name": "Christiaan Bezuidenhout", "odds": "+25000" },
+        { "name": "Chris Kirk", "odds": "+25000" },
+        { "name": "Nico Echavarria", "odds": "+30000" },
+        { "name": "Austin Eckroat", "odds": "+30000" }
+      ]
+    },
+    {
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Kevin Yu", "odds": "+30000" },
+        { "name": "Nick Dunlap", "odds": "+30000" },
+        { "name": "Tom Hoge", "odds": "+30000" },
+        { "name": "Thriston Lawrence", "odds": "+40000" },
+        { "name": "Matt McCarty", "odds": "+40000" },
+        { "name": "Jhonattan Vegas", "odds": "+40000" },
+        { "name": "Bubba Watson", "odds": "+50000" },
+        { "name": "Danny Willett", "odds": "+50000" }
+      ]
+    },
+    {
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Charl Schwartzel", "odds": "+50000" },
+        { "name": "Jose Luis Ballester (a)", "odds": "+50000" },
+        { "name": "Hiroshi Tai (a)", "odds": "+50000" },
+        { "name": "Matthieu Pavon", "odds": "+50000" },
+        { "name": "Brian Campbell", "odds": "+50000
+        { "name": "Adam Schenk", "odds": "+55000" },
+        { "name": "Patton Kizzire", "odds": "+60000" },
+        { "name": "Davis Riley", "odds": "+60000" }
+      ]
+    },
+    {
+      "category": "Choose 1",
+      "instruction": "Pick 1 golfer from this group.",
+      "players": [
+        { "name": "Noah Kent (a)", "odds": "+70000" },
+        { "name": "Zach Johnson", "odds": "+80000" },
+        { "name": "Bernhard Langer", "odds": "+80000" },
+        { "name": "Justin Hastings (a)", "odds": "+80000" },
+        { "name": "Evan Beck (a)", "odds": "+100000" },
+        { "name": "Rafael Campos", "odds": "+100000" },
+        { "name": "Angel Cabrera", "odds": "+200000" },
+        { "name": "Fred Couples", "odds": "+200000" },
+        { "name": "Jose Maria Olazabal", "odds": "+200000" },
+        { "name": "Vijay Singh", "odds": "+200000" },
+        { "name": "Mike Weir", "odds": "+200000" }
+      ]
     }
   ]
 }
