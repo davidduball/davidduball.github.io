@@ -11,11 +11,11 @@
         <h1>A Pool Unlike Any Other</h1>
     </header>
 
-    <!-- Form with netlify form handling -->
+    <!-- Form with Netlify form handling -->
     <form name="golf-form" method="POST" data-netlify="true" onsubmit="submitForm(event)">
         <!-- Hidden field to tell Netlify which form to handle -->
         <input type="hidden" name="form-name" value="golf-form" />
-        
+
         <!-- Input fields for name and team -->
         <div>
             <label for="name">Your Name:</label>
@@ -69,12 +69,12 @@
                     if (categoryData.category === 'Choose 2') {
                         input.type = 'checkbox'; // Use checkboxes for the "Choose 2" category
                         input.id = player.name;
-                        input.name = `question${index + 1}[]`;  // Use the same name for checkboxes (array)
+                        input.name = `question${index + 1}[]`;  // Use array format for checkboxes
                         input.value = player.name;
                     } else {
                         input.type = 'radio'; // Use radio buttons for "Choose 1" category
                         input.id = player.name;
-                        input.name = `question${index + 1}`;  // Each question needs a unique name for radio buttons
+                        input.name = `question${index + 1}`;  // Use a unique name for each question
                         input.value = player.name;
                     }
 
@@ -97,7 +97,9 @@
 
         // Function to handle form submission
         function submitForm(event) {
-            // The form will be submitted automatically via Netlify; we handle this to prevent additional actions
+            // We don't need to manually handle the submission, as Netlify will take care of that
+            // but we can log the form data to check if it is being captured properly.
+
             const formData = new FormData(event.target);
             const data = {
                 name: formData.get('name'),
@@ -106,7 +108,7 @@
             };
 
             // Collect selected golfers from the radio buttons or checkboxes
-            const questionData = JSON.parse(localStorage.getItem('questionData')); // Using localStorage to persist question data temporarily
+            const questionData = JSON.parse(localStorage.getItem('questionData')); // Temporarily using localStorage
             questionData.forEach((categoryData, index) => {
                 const selectedPlayers = formData.getAll(`question${index + 1}`);
                 if (selectedPlayers.length > 0) {
@@ -116,6 +118,8 @@
 
             // Log the collected data (optional for testing)
             console.log(data);
+
+            // Normally, Netlify takes over submission from here automatically!
         }
     </script>
 </body>
