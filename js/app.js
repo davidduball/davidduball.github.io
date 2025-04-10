@@ -38,14 +38,9 @@ function calculateTotalScore(picks, liveScores) {
 }
 
 function formatScore(score) {
-  if (score === null || score === undefined || isNaN(score)) return '--';
+  if (score === null || score === undefined || isNaN(score)) return '';
   if (score === 0) return 'E';
   return score > 0 ? `+${score}` : score;
-}
-
-function formatRoundScore(score) {
-  if (score === null || score === undefined || isNaN(score)) return '--';
-  return score;
 }
 
 function renderLeaderboard(entries, liveScores) {
@@ -56,13 +51,24 @@ function renderLeaderboard(entries, liveScores) {
   const mastersHeader = document.createElement('div');
   mastersHeader.className = 'masters-header';
   mastersHeader.innerHTML = `
-    <h1>MASTERS</h1>
-    <h3>A Leaderboard for a Pool Unlike Any Other</h3>
+    <h1>2025 Masters Pool</h1>
   `;
   container.appendChild(mastersHeader);
   
   // Sort entries by score
   entries.sort((a, b) => calculateTotalScore(a.picks, liveScores) - calculateTotalScore(b.picks, liveScores));
+  
+  // Create filter options (similar to the Masters site)
+  const filterOptions = document.createElement('div');
+  filterOptions.className = 'filter-options';
+  filterOptions.innerHTML = `
+    <div class="filter-container">
+      <button class="filter-btn">Traditional</button>
+      <button class="filter-btn">All Players</button>
+    </div>
+    <div class="time-info">All times in EDT</div>
+  `;
+  container.appendChild(filterOptions);
   
   // Add the main leaderboard table
   const leaderboardTable = document.createElement('table');
@@ -72,17 +78,18 @@ function renderLeaderboard(entries, liveScores) {
   const tableHeader = document.createElement('thead');
   tableHeader.innerHTML = `
     <tr class="header-row">
-      <th>#</th>
-      <th>Team</th>
-      <th>Golfers</th>
-      <th>Round 1</th>
-      <th>Round 2</th>
-      <th>Round 3</th>
-      <th>Round 4</th>
-      <th>72 Hole Total</th>
-      <th>Team Score</th>
-      <th>Prop points</th>
-      <th>Total Score</th>
+      <th class="pos-column">POS</th>
+      <th class="player-column">TEAM</th>
+      <th class="total-column">TOTAL</th>
+      <th class="thru-column">THRU</th>
+      <th class="today-column">TODAY</th>
+      <th class="round-column">R1</th>
+      <th class="round-column">R2</th>
+      <th class="round-column">R3</th>
+      <th class="round-column">R4</th>
+      <th class="total-column">TOTAL</th>
+      <th class="action-column"></th>
+      <th class="action-column"></th>
     </tr>
   `;
   leaderboardTable.appendChild(tableHeader);
@@ -92,22 +99,43 @@ function renderLeaderboard(entries, liveScores) {
   
   entries.forEach((entry, index) => {
     const totalScore = calculateTotalScore(entry.picks, liveScores);
-    // 15 is a placeholder for prop points - you'll need to implement this
-    const propPoints = entry.propPoints || 15; 
-    const totalWithProps = totalScore + propPoints;
+    const formattedScore = formatScore(totalScore);
     
-    // Team header row
+    // Team header row (collapsible)
     const teamRow = document.createElement('tr');
     teamRow.className = 'team-row';
+    teamRow.dataset.team = `team-${index}`;
     teamRow.innerHTML = `
-      <td>${index + 1}</td>
-      <td class="team-name">${entry.name}</td>
-      <td colspan="6"></td>
-      <td>${totalScore}</td>
-      <td>${propPoints}</td>
-      <td>${totalWithProps}</td>
+      <td class="pos-column">${index + 1}</td>
+      <td class="player-column">
+        <div class="player-info">
+          <span class="player-name">${entry.name}</span>
+        </div>
+      </td>
+      <td class="total-column">${formattedScore}</td>
+      <td class="thru-column"></td>
+      <td class="today-column"></td>
+      <td class="round-column"></td>
+      <td class="round-column"></td>
+      <td class="round-column"></td>
+      <td class="round-column"></td>
+      <td class="total-column">${formattedScore}</td>
+      <td class="action-column"><button class="track-btn">🏁</button></td>
+      <td class="action-column"><button class="fav-btn">★</button></td>
     `;
     tableBody.appendChild(teamRow);
+    
+    // Create collapsible container for golfers
+    const golfersContainer = document.createElement('tr');
+    golfersContainer.className = 'golfers-container';
+    golfersContainer.id = `team-${index}-golfers`;
+    golfersContainer.style.display = 'none';
+    
+    const golfersCell = document.createElement('td');
+    golfersCell.colSpan = 12;
+    
+    const golfersTable = document.createElement('table');
+    golfersTable.className = 'golfers-table';
     
     // Add rows for each golfer
     entry.picks.forEach(player => {
@@ -115,24 +143,40 @@ function renderLeaderboard(entries, liveScores) {
       const golferRow = document.createElement('tr');
       golferRow.className = 'golfer-row';
       golferRow.innerHTML = `
-        <td></td>
-        <td></td>
-        <td class="player-name">${player}</td>
-        <td>${formatRoundScore(data?.r1)}</td>
-        <td>${formatRoundScore(data?.r2)}</td>
-        <td>${formatRoundScore(data?.r3)}</td>
-        <td>${formatRoundScore(data?.r4)}</td>
-        <td class="total-score">${formatScore(data?.total)}</td>
-        <td colspan="3"></td>
+        <td class="pos-column"></td>
+        <td class="player-column">
+          <div class="player-info">
+            <img src="https://via.placeholder.com/30" class="player-img" alt="${player}">
+            <span class="player-name">${player}</span>
+          </div>
+        </td>
+        <td class="total-column">${formatScore(data?.total)}</td>
+        <td class="thru-column"></td>
+        <td class="today-column"></td>
+        <td class="round-column">${data?.r1 || ''}</td>
+        <td class="round-column">${data?.r2 || ''}</td>
+        <td class="round-column">${data?.r3 || ''}</td>
+        <td class="round-column">${data?.r4 || ''}</td>
+        <td class="total-column">${formatScore(data?.total)}</td>
+        <td class="action-column"><button class="track-btn">🏁</button></td>
+        <td class="action-column"><button class="fav-btn">★</button></td>
       `;
-      tableBody.appendChild(golferRow);
+      golfersTable.appendChild(golferRow);
     });
     
-    // Add a spacer row
-    const spacerRow = document.createElement('tr');
-    spacerRow.className = 'spacer-row';
-    spacerRow.innerHTML = `<td colspan="11"></td>`;
-    tableBody.appendChild(spacerRow);
+    golfersCell.appendChild(golfersTable);
+    golfersContainer.appendChild(golfersCell);
+    tableBody.appendChild(golfersContainer);
+    
+    // Add click event to toggle golfer visibility
+    teamRow.addEventListener('click', function() {
+      const golfersElement = document.getElementById(`team-${index}-golfers`);
+      if (golfersElement.style.display === 'none') {
+        golfersElement.style.display = 'table-row';
+      } else {
+        golfersElement.style.display = 'none';
+      }
+    });
   });
   
   leaderboardTable.appendChild(tableBody);
@@ -143,92 +187,166 @@ function renderLeaderboard(entries, liveScores) {
 function addMastersStyles() {
   const styleElement = document.createElement('style');
   styleElement.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+    
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Playfair Display', Georgia, serif;
       margin: 0;
       padding: 20px;
-      background-color: #f5f5f5;
+      background-color: #fafafa;
+      color: #333;
     }
     
     #leaderboard {
       max-width: 1200px;
       margin: 0 auto;
-      background-color: #e6f2ef;
+      background-color: #fff;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .masters-header {
-      text-align: center;
-      margin-bottom: 20px;
-      padding: 20px;
-      background-color: #e6f2ef;
+      text-align: left;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 15px;
     }
     
     .masters-header h1 {
-      color: #006442;
-      font-size: 48px;
+      color: #006747;
+      font-size: 32px;
       margin: 0;
-      font-weight: bold;
+      font-weight: normal;
+      font-family: 'Playfair Display', Georgia, serif;
     }
     
-    .masters-header h3 {
-      color: #006442;
-      font-size: 18px;
-      margin: 10px 0 0;
+    .filter-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .filter-container {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .filter-btn {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-family: 'Playfair Display', Georgia, serif;
+      cursor: pointer;
+      color: #006747;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover {
+      border-color: #006747;
+    }
+    
+    .time-info {
+      color: #777;
+      font-size: 14px;
     }
     
     .main-leaderboard {
       width: 100%;
       border-collapse: collapse;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      font-family: 'Playfair Display', Georgia, serif;
     }
     
     .header-row {
-      background-color: #006442;
+      background-color: #006747;
       color: white;
       text-align: left;
     }
     
     .header-row th {
-      padding: 10px;
+      padding: 15px 10px;
+      font-weight: normal;
       font-size: 14px;
+      text-align: center;
     }
     
-    .team-row {
-      background-color: #006442;
-      color: white;
-      font-weight: bold;
+    .header-row .player-column {
+      text-align: left;
     }
     
-    .team-row td {
-      padding: 10px;
+    .team-row, .golfer-row {
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.2s;
+      cursor: pointer;
     }
     
-    .team-name {
-      font-size: 16px;
+    .team-row:hover, .golfer-row:hover {
+      background-color: #f9f7e8; /* Very subtle yellow */
     }
     
-    .golfer-row {
-      background-color: #f9d44c;
+    .team-row td, .golfer-row td {
+      padding: 15px 10px;
+      text-align: center;
     }
     
-    .golfer-row td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #e6c33c;
+    .player-column {
+      text-align: left !important;
+      min-width: 200px;
+    }
+    
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .player-img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
     }
     
     .player-name {
+      font-weight: normal;
+    }
+    
+    .team-row .player-name {
       font-weight: bold;
     }
     
-    .total-score {
-      font-weight: bold;
+    .golfers-table {
+      width: 100%;
+      border-collapse: collapse;
     }
     
-    .spacer-row {
-      height: 10px;
+    .golfers-container {
+      background-color: #fdfcf7; /* Very light yellow/cream */
+    }
+    
+    .pos-column {
+      width: 40px;
+    }
+    
+    .total-column, .round-column, .thru-column, .today-column {
+      width: 60px;
+    }
+    
+    .action-column {
+      width: 30px;
+    }
+    
+    .track-btn, .fav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #bbb;
+      transition: color 0.2s;
+    }
+    
+    .track-btn:hover, .fav-btn:hover {
+      color: #006747;
     }
   `;
   document.head.appendChild(styleElement);
