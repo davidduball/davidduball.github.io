@@ -264,5 +264,95 @@
       "Harris English",
       "Austin Eckroat"
     ]
+  },
+  {
+    "name": "Brian Willis",
+    "picks": [
+      "Scottie Scheffler  (+350)",
+      "Xander Schauffele  (+1800)",
+      "Hideki Matsuyama  (+2800)",
+      "Viktor Hovland  (+3500)",
+      "Corey Conners  (+7000)",
+      "Justin Rose  (+11000)",
+      "Matt Fitzpatrick  (+13000)",
+      "Stephan Jaeger  (+18000)",
+      "Tom Hoge  (+30000)",
+      "Noah Kent (a) - US Amateur runner-up (+70000)"
+    ]
+  },
+  {
+    "name": "Cook Houdini",
+    "picks": [
+      "Scottie Scheffler  (+350)",
+      "Bryson DeChambeau  (+2000)",
+      "Joaquin Niemann  (+2800)",
+      "Shane Lowry  (+4500)",
+      "Sepp Straka  (+7500)",
+      "Dustin Johnson  (+10000)",
+      "J.J. Spaun  (+13000)",
+      "Phil Mickelson  (+20000)",
+      "Thriston Lawrence  (+40000)",
+      "Bernhard Langer  (+80000)"
+    ]
+  },
+  {
+    "name": "Danny",
+    "picks": [
+      "Rory McIlroy  (+650)",
+      "Justin Thomas  (+2200)",
+      "Tyrrell Hatton  (+3500)",
+      "Shane Lowry  (+4500)",
+      "Sepp Straka  (+7500)",
+      "Jason Day  (+7500)",
+      "Rasmus H\u00f8jgaard  (+17000)",
+      "Phil Mickelson  (+20000)",
+      "Bubba Watson  (+50000)",
+      "Noah Kent (a) - US Amateur runner-up (+70000)"
+    ]
+  },
+  {
+    "name": "Christopher Keller",
+    "picks": [
+      "Scottie Scheffler  (+350)",
+      "Jon Rahm  (+1300)",
+      "Hideki Matsuyama  (+2800)",
+      "Brooks Koepka  (+2800)",
+      "Wyndham Clark  (+8000)",
+      "Sam Burns  (+9000)",
+      "J.J. Spaun  (+13000)",
+      "Cameron Young  (+20000)",
+      "Tom Hoge  (+30000)",
+      "Zach Johnson  (+80000)"
+    ]
+  },
+  {
+    "name": "Pat Brown",
+    "picks": [
+      "Scottie Scheffler  (+350)",
+      "Ludvig \u00c5berg  (+1600)",
+      "Joaquin Niemann  (+2800)",
+      "Cameron Smith  (+5000)",
+      "Sepp Straka  (+7500)",
+      "Sahith Theegala  (+10000)",
+      "Thomas Detry  (+15000)",
+      "Harris English  (+18000)",
+      "Tom Hoge  (+30000)",
+      "Evan Beck (a) - US Mid-Amateur champion (+100000)"
+    ]
+  },
+  {
+    "name": "Marybeth",
+    "picks": [
+      "Rory McIlroy  (+650)",
+      "Ludvig \u00c5berg  (+1600)",
+      "Jordan Spieth  (+3000)",
+      "Shane Lowry  (+4500)",
+      "Corey Conners  (+7000)",
+      "Adam Scott  (+11000)",
+      "Maverick McNealy  (+15000)",
+      "Phil Mickelson  (+20000)",
+      "Matt McCarty  (+40000)",
+      "Fred Couples  (+200000)"
+    ]
   }
 ]
