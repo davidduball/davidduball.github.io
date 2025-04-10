@@ -169,7 +169,7 @@ function addMastersStyles() {
     }
     
     #leaderboard {
-      background-color: #f9e79f; /* Using your existing yellow background */
+      background-color: #fff8dc; /* Using your existing yellow background */
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
