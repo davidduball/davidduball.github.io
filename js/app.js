@@ -9,15 +9,27 @@ async function fetchLiveScores() {
 
   const scoreMap = {};
   data.forEach(row => {
-    const name = row["PLAYER"] || row["Name"] || "";
-    const raw = row["TOT"] || row["Total"] || "E";
+    const name = (row["PLAYER"] || row["Name"] || "").trim();
+    if (!name) return;
 
-    let score = 0;
-    if (raw === "E") score = 0;
-    else if (!isNaN(parseInt(raw))) score = parseInt(raw);
-    else if (raw.startsWith("+") || raw.startsWith("-")) score = parseInt(raw);
+    const totalRaw = row["TOT"] || row["Total"] || "E";
+    const r1 = parseInt(row["R1"]) || null;
+    const r2 = parseInt(row["R2"]) || null;
+    const r3 = parseInt(row["R3"]) || null;
+    const r4 = parseInt(row["R4"]) || null;
 
-    if (name) scoreMap[name.trim()] = score;
+    let total = 0;
+    if (totalRaw === "E") total = 0;
+    else if (!isNaN(parseInt(totalRaw))) total = parseInt(totalRaw);
+    else if (totalRaw.startsWith("+") || totalRaw.startsWith("-")) total = parseInt(totalRaw);
+
+    scoreMap[name] = {
+      total,
+      r1,
+      r2,
+      r3,
+      r4
+    };
   });
 
   return scoreMap;
@@ -25,9 +37,15 @@ async function fetchLiveScores() {
 
 function calculateTotalScore(picks, liveScores) {
   return picks.reduce((total, player) => {
-    const score = liveScores[player.trim()] ?? 0;
+    const score = liveScores[player.trim()]?.total ?? 0;
     return total + score;
   }, 0);
+}
+
+function formatScore(score) {
+  if (score === null || score === undefined || isNaN(score)) return '';
+  if (score === 0) return 'E';
+  return score > 0 ? `+${score}` : score;
 }
 
 function renderLeaderboard(entries, liveScores) {
@@ -43,19 +61,47 @@ function renderLeaderboard(entries, liveScores) {
 
     const header = document.createElement('div');
     header.className = 'entry-header';
-    header.innerHTML = `<strong>#${index + 1}</strong> ${entry.name} — Total: ${totalScore > 0 ? '+' + totalScore : totalScore}`;
+    header.innerHTML = `<strong>#${index + 1}</strong> ${entry.name} — Total: ${formatScore(totalScore)}`;
 
     const details = document.createElement('div');
     details.className = 'entry-details';
     details.style.display = 'none';
 
+    // Create table
+    const table = document.createElement('table');
+    table.className = 'leaderboard-table';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th>Player</th>
+        <th>R1</th>
+        <th>R2</th>
+        <th>R3</th>
+        <th>R4</th>
+        <th>Total</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
     entry.picks.forEach(player => {
-      const playerScore = liveScores[player.trim()];
-      const scoreDisplay = playerScore === 0 ? 'E' : (playerScore > 0 ? '+' + playerScore : playerScore);
-      const line = document.createElement('div');
-      line.textContent = `${player}: ${scoreDisplay}`;
-      details.appendChild(line);
+      const data = liveScores[player.trim()];
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="player-name">${player}</td>
+        <td>${formatScore(data?.r1)}</td>
+        <td>${formatScore(data?.r2)}</td>
+        <td>${formatScore(data?.r3)}</td>
+        <td>${formatScore(data?.r4)}</td>
+        <td class="total-score">${formatScore(data?.total)}</td>
+      `;
+      tbody.appendChild(row);
     });
+
+    table.appendChild(tbody);
+    details.appendChild(table);
 
     header.addEventListener('click', () => {
       details.style.display = details.style.display === 'none' ? 'block' : 'none';
