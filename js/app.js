@@ -11,44 +11,67 @@ async function fetchLiveScores() {
     const name = (row["PLAYER"] || row["Name"] || "").trim();
     if (!name) return;
     
-    // Get both raw total strokes and relative score
-    const totalStrokes = row["TOT"] || row["Total"] || "0";
-    const relativeScore = row["SCORE"] || row["RelativeScore"] || "E";
-    // Get player position from leaderboard
+    // Get the raw values from the data
     const position = row["POS"] || row["Position"] || "-";
+    const scoreDisplay = row["SCORE"] || row["RelativeScore"] || "E"; // For display purposes
+    const totalDisplay = row["TOT"] || row["Total"] || "0"; // For display purposes
     
-    let r1 = parseInt(row["R1"]) || null;
-    let r2 = parseInt(row["R2"]) || null;
-    let r3 = parseInt(row["R3"]) || null;
-    let r4 = parseInt(row["R4"]) || null;
+    // Raw round values for display
+    const r1Display = row["R1"] || "-";
+    const r2Display = row["R2"] || "-";
+    const r3Display = row["R3"] || "-";
+    const r4Display = row["R4"] || "-";
     
-    // Assign 80 for unplayed rounds
-    if (r1 === null) r1 = 80;
-    if (r2 === null) r2 = 80;
-    if (r3 === null) r3 = 80;
-    if (r4 === null) r4 = 80;
+    // For calculation - parse rounds and add 80 for missing rounds
+    let r1Value = parseInt(row["R1"]) || null;
+    let r2Value = parseInt(row["R2"]) || null;
+    let r3Value = parseInt(row["R3"]) || null;
+    let r4Value = parseInt(row["R4"]) || null;
     
-    // Calculate total strokes with the 80-score replacement for missing rounds
-    let calculatedTotal = r1 + r2 + r3 + r4;
+    // Check if player has a special status like "CUT", "WD", etc.
+    const hasSpecialStatus = typeof scoreDisplay === 'string' && 
+                          (scoreDisplay === "CUT" || 
+                           scoreDisplay === "WD" || 
+                           scoreDisplay === "DQ" ||
+                           scoreDisplay === "DNS");
     
-    // Parse relative score
+    // Assign 80 for unplayed rounds if needed for calculation
+    if (r1Value === null) r1Value = 80;
+    if (r2Value === null) r2Value = 80;
+    if (r3Value === null) r3Value = 80;
+    if (r4Value === null) r4Value = 80;
+    
+    // Calculate total strokes for scoring purposes
+    let calculatedTotal = r1Value + r2Value + r3Value + r4Value;
+    
+    // Parse relative score for calculation purposes
     let relativeScoreValue = 0;
-    if (relativeScore === "E") {
+    if (scoreDisplay === "E") {
       relativeScoreValue = 0;
-    } else if (relativeScore.startsWith("+") || relativeScore.startsWith("-")) {
-      relativeScoreValue = parseInt(relativeScore);
-    } else if (!isNaN(parseInt(relativeScore))) {
-      relativeScoreValue = parseInt(relativeScore);
+    } else if (typeof scoreDisplay === 'string' && (scoreDisplay.startsWith("+") || scoreDisplay.startsWith("-"))) {
+      relativeScoreValue = parseInt(scoreDisplay);
+    } else if (!isNaN(parseInt(scoreDisplay))) {
+      relativeScoreValue = parseInt(scoreDisplay);
+    } else if (hasSpecialStatus) {
+      // For players who are CUT/WD/DQ, assign a high relative score for sorting
+      relativeScoreValue = 100;
     }
     
     scoreMap[name] = {
       position: position,
-      totalStrokes: calculatedTotal, // Use calculated total with 80s for missing rounds
-      relativeScore: relativeScoreValue,
-      r1,
-      r2,
-      r3,
-      r4
+      scoreDisplay: scoreDisplay,  // Original display value
+      totalDisplay: totalDisplay,  // Original display value
+      r1Display: r1Display,        // Original display value
+      r2Display: r2Display,        // Original display value
+      r3Display: r3Display,        // Original display value
+      r4Display: r4Display,        // Original display value
+      hasSpecialStatus: hasSpecialStatus,
+      totalStrokes: calculatedTotal, // Calculated total with 80s for missing rounds
+      relativeScore: relativeScoreValue, // Calculated value for sorting
+      r1: r1Value,
+      r2: r2Value,
+      r3: r3Value,
+      r4: r4Value
     };
   });
   return scoreMap;
@@ -60,6 +83,13 @@ function getTop6Scores(picks, liveScores) {
     const playerName = player.trim();
     const scoreData = liveScores[playerName] || { 
       position: "-", 
+      scoreDisplay: "E",
+      totalDisplay: "0",
+      r1Display: "-",
+      r2Display: "-",
+      r3Display: "-",
+      r4Display: "-",
+      hasSpecialStatus: false,
       totalStrokes: 320, 
       relativeScore: 0,
       r1: 80,
@@ -70,9 +100,19 @@ function getTop6Scores(picks, liveScores) {
     return {
       playerName,
       position: scoreData.position,
+      scoreDisplay: scoreData.scoreDisplay,
+      totalDisplay: scoreData.totalDisplay,
+      r1Display: scoreData.r1Display,
+      r2Display: scoreData.r2Display,
+      r3Display: scoreData.r3Display,
+      r4Display: scoreData.r4Display,
+      hasSpecialStatus: scoreData.hasSpecialStatus,
       totalStrokes: scoreData.totalStrokes,
       relativeScore: scoreData.relativeScore,
-      rounds: [scoreData.r1, scoreData.r2, scoreData.r3, scoreData.r4]
+      r1: scoreData.r1,
+      r2: scoreData.r2,
+      r3: scoreData.r3,
+      r4: scoreData.r4
     };
   });
   
@@ -188,6 +228,13 @@ function renderLeaderboard(entries, liveScores) {
       const playerName = player.trim();
       const data = liveScores[playerName] || { 
         position: "-",
+        scoreDisplay: "E",
+        totalDisplay: "0",
+        r1Display: "-",
+        r2Display: "-",
+        r3Display: "-",
+        r4Display: "-",
+        hasSpecialStatus: false,
         totalStrokes: 320, 
         relativeScore: 0,
         r1: 80,
@@ -199,7 +246,7 @@ function renderLeaderboard(entries, liveScores) {
       const isTop6 = top6Players.some(p => p.playerName === playerName);
       
       const golferRow = document.createElement('tr');
-      golferRow.className = `golfer-row ${isTop6 ? 'top-six' : ''}`;
+      golferRow.className = `golfer-row ${isTop6 ? 'top-six' : ''} ${data.hasSpecialStatus ? 'special-status' : ''}`;
       golferRow.innerHTML = `
         <td class="pos-column">${data.position}</td>
         <td class="player-column">
@@ -207,12 +254,12 @@ function renderLeaderboard(entries, liveScores) {
             <span class="player-name">${playerName}</span>
           </div>
         </td>
-        <td class="score-column">${formatRelativeScore(data.relativeScore)}</td>
-        <td class="total-column">${data.totalStrokes}</td>
-        <td class="round-column">${data.r1}</td>
-        <td class="round-column">${data.r2}</td>
-        <td class="round-column">${data.r3}</td>
-        <td class="round-column">${data.r4}</td>
+        <td class="score-column">${data.scoreDisplay}</td>
+        <td class="total-column">${data.totalDisplay}</td>
+        <td class="round-column">${data.r1Display}</td>
+        <td class="round-column">${data.r2Display}</td>
+        <td class="round-column">${data.r3Display}</td>
+        <td class="round-column">${data.r4Display}</td>
       `;
       golfersTable.appendChild(golferRow);
     });
@@ -359,6 +406,10 @@ function addMastersStyles() {
     .golfer-row.top-six {
       background-color: #f0f8e8; /* Light green highlight for top 6 */
       font-weight: bold;
+    }
+    
+    .golfer-row.special-status {
+      color: #777; /* Gray out players with special status */
     }
     
     .golfer-row:hover {
