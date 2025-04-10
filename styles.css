@@ -85,3 +85,35 @@ input[type="submit"]:hover {
     padding: 8px;
   }
 }
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff8dc; /* subtle parchment yellow */
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  text-align: center;
+  border: 2px solid green;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  border: 1px solid green;
+  padding: 6px;
+}
+
+.leaderboard-table th {
+  background-color: #006400;
+  color: white;
+  font-weight: bold;
+}
+
+.player-name {
+  text-align: left;
+  font-weight: bold;
+  padding-left: 10px;
+}
+
+.total-score {
+  font-weight: bold;
+}
+
