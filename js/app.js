@@ -177,11 +177,19 @@ function renderLeaderboard(entries, liveScores) {
   `;
   container.appendChild(mastersHeader);
   
-  // Sort entries by relative score (lowest/best scores at top)
+  // Sort entries by total strokes first (lowest first), then by relative score if tied
   entries.sort((a, b) => {
-    const scoreA = calculateRelativeScore(a.picks, liveScores);
-    const scoreB = calculateRelativeScore(b.picks, liveScores);
-    return scoreA - scoreB;
+    const totalStrokesA = calculateTotalStrokes(a.picks, liveScores);
+    const totalStrokesB = calculateTotalStrokes(b.picks, liveScores);
+    
+    if (totalStrokesA === totalStrokesB) {
+      // If total strokes are equal, use relative score as tie-breaker
+      const scoreA = calculateRelativeScore(a.picks, liveScores);
+      const scoreB = calculateRelativeScore(b.picks, liveScores);
+      return scoreA - scoreB;
+    }
+    
+    return totalStrokesA - totalStrokesB;
   });
   
   // Add the main leaderboard table with container for scrolling on mobile
@@ -191,7 +199,7 @@ function renderLeaderboard(entries, liveScores) {
   const leaderboardTable = document.createElement('table');
   leaderboardTable.className = 'main-leaderboard';
   
-  // Create header row with new PROPS column
+  // Create header row with labeled PROPS column
   const tableHeader = document.createElement('thead');
   tableHeader.innerHTML = `
     <tr class="header-row">
@@ -246,10 +254,26 @@ function renderLeaderboard(entries, liveScores) {
     golfersContainer.style.display = 'none';
     
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 9; // Updated from 8 to 9 to account for new PROPS column
+    golfersCell.colSpan = 9; // Updated to 9 to account for PROPS column
     
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
+    
+    // Table header for golfers table
+    const golfersHeader = document.createElement('tr');
+    golfersHeader.className = 'golfers-header-row';
+    golfersHeader.innerHTML = `
+      <th class="pos-column">POS</th>
+      <th class="player-column">PLAYER</th>
+      <th class="score-column">SCORE</th>
+      <th class="total-column">TOTAL</th>
+      <th class="props-column">PROPS</th>
+      <th class="round-column">R1</th>
+      <th class="round-column">R2</th>
+      <th class="round-column">R3</th>
+      <th class="round-column">R4</th>
+    `;
+    golfersTable.appendChild(golfersHeader);
     
     // Add rows for each golfer, indicating which ones are in the top 6
     entry.picks.forEach(player => {
@@ -367,12 +391,12 @@ function addMastersStyles() {
       border: 2px solid #006400;
     }
     
-    .header-row {
+    .header-row, .golfers-header-row {
       background-color: #006400;
       color: white;
     }
     
-    .header-row th {
+    .header-row th, .golfers-header-row th {
       padding: 10px;
       font-weight: bold;
       text-align: center;
@@ -426,6 +450,10 @@ function addMastersStyles() {
       width: 100%;
       border-collapse: collapse;
       background-color: #fff8dc;
+    }
+    
+    .golfers-header-row {
+      font-size: 14px;
     }
     
     .golfer-row {
