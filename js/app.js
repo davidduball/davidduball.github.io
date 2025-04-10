@@ -429,7 +429,7 @@ function addMastersStyles() {
       min-width: 150px; /* Ensure player names have enough space */
     }
     
-    .props-column {
+    td.props-column {
       font-weight: normal;
       color: #006400;
     }
