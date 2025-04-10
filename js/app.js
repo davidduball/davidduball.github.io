@@ -51,24 +51,12 @@ function renderLeaderboard(entries, liveScores) {
   const mastersHeader = document.createElement('div');
   mastersHeader.className = 'masters-header';
   mastersHeader.innerHTML = `
-    <h1>2025 Masters Pool</h1>
+    <h2>2025 Masters Pool</h2>
   `;
   container.appendChild(mastersHeader);
   
   // Sort entries by score
   entries.sort((a, b) => calculateTotalScore(a.picks, liveScores) - calculateTotalScore(b.picks, liveScores));
-  
-  // Create filter options (similar to the Masters site)
-  const filterOptions = document.createElement('div');
-  filterOptions.className = 'filter-options';
-  filterOptions.innerHTML = `
-    <div class="filter-container">
-      <button class="filter-btn">Traditional</button>
-      <button class="filter-btn">All Players</button>
-    </div>
-    <div class="time-info">All times in EDT</div>
-  `;
-  container.appendChild(filterOptions);
   
   // Add the main leaderboard table
   const leaderboardTable = document.createElement('table');
@@ -81,15 +69,11 @@ function renderLeaderboard(entries, liveScores) {
       <th class="pos-column">POS</th>
       <th class="player-column">TEAM</th>
       <th class="total-column">TOTAL</th>
-      <th class="thru-column">THRU</th>
-      <th class="today-column">TODAY</th>
       <th class="round-column">R1</th>
       <th class="round-column">R2</th>
       <th class="round-column">R3</th>
       <th class="round-column">R4</th>
       <th class="total-column">TOTAL</th>
-      <th class="action-column"></th>
-      <th class="action-column"></th>
     </tr>
   `;
   leaderboardTable.appendChild(tableHeader);
@@ -113,15 +97,11 @@ function renderLeaderboard(entries, liveScores) {
         </div>
       </td>
       <td class="total-column">${formattedScore}</td>
-      <td class="thru-column"></td>
-      <td class="today-column"></td>
       <td class="round-column"></td>
       <td class="round-column"></td>
       <td class="round-column"></td>
       <td class="round-column"></td>
       <td class="total-column">${formattedScore}</td>
-      <td class="action-column"><button class="track-btn">🏁</button></td>
-      <td class="action-column"><button class="fav-btn">★</button></td>
     `;
     tableBody.appendChild(teamRow);
     
@@ -132,7 +112,7 @@ function renderLeaderboard(entries, liveScores) {
     golfersContainer.style.display = 'none';
     
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 12;
+    golfersCell.colSpan = 8;
     
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
@@ -146,20 +126,15 @@ function renderLeaderboard(entries, liveScores) {
         <td class="pos-column"></td>
         <td class="player-column">
           <div class="player-info">
-            <img src="https://via.placeholder.com/30" class="player-img" alt="${player}">
             <span class="player-name">${player}</span>
           </div>
         </td>
         <td class="total-column">${formatScore(data?.total)}</td>
-        <td class="thru-column"></td>
-        <td class="today-column"></td>
         <td class="round-column">${data?.r1 || ''}</td>
         <td class="round-column">${data?.r2 || ''}</td>
         <td class="round-column">${data?.r3 || ''}</td>
         <td class="round-column">${data?.r4 || ''}</td>
         <td class="total-column">${formatScore(data?.total)}</td>
-        <td class="action-column"><button class="track-btn">🏁</button></td>
-        <td class="action-column"><button class="fav-btn">★</button></td>
       `;
       golfersTable.appendChild(golferRow);
     });
@@ -187,166 +162,122 @@ function renderLeaderboard(entries, liveScores) {
 function addMastersStyles() {
   const styleElement = document.createElement('style');
   styleElement.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
-    
-    body {
-      font-family: 'Playfair Display', Georgia, serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #fafafa;
-      color: #333;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
     }
     
     #leaderboard {
-      max-width: 1200px;
-      margin: 0 auto;
-      background-color: #fff;
+      background-color: #f9e79f; /* Using your existing yellow background */
       padding: 20px;
-      border-radius: 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 40px;
     }
     
     .masters-header {
-      text-align: left;
-      margin-bottom: 30px;
-      border-bottom: 1px solid #e0e0e0;
-      padding-bottom: 15px;
-    }
-    
-    .masters-header h1 {
-      color: #006747;
-      font-size: 32px;
-      margin: 0;
-      font-weight: normal;
-      font-family: 'Playfair Display', Georgia, serif;
-    }
-    
-    .filter-options {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      text-align: center;
       margin-bottom: 20px;
     }
     
-    .filter-container {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .filter-btn {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-family: 'Playfair Display', Georgia, serif;
-      cursor: pointer;
-      color: #006747;
-      transition: all 0.2s;
-    }
-    
-    .filter-btn:hover {
-      border-color: #006747;
-    }
-    
-    .time-info {
-      color: #777;
-      font-size: 14px;
+    .masters-header h2 {
+      color: #006400;
+      font-family: "Times New Roman", serif;
+      margin: 0;
     }
     
     .main-leaderboard {
       width: 100%;
       border-collapse: collapse;
-      font-family: 'Playfair Display', Georgia, serif;
+      background-color: #fff8dc; /* Using your subtle parchment yellow */
+      font-family: 'Georgia', serif;
+      font-size: 16px;
+      border: 2px solid #006400;
     }
     
     .header-row {
-      background-color: #006747;
+      background-color: #006400;
       color: white;
-      text-align: left;
     }
     
     .header-row th {
-      padding: 15px 10px;
-      font-weight: normal;
-      font-size: 14px;
+      padding: 10px;
+      font-weight: bold;
       text-align: center;
+      border: 1px solid #006400;
     }
     
-    .header-row .player-column {
-      text-align: left;
-    }
-    
-    .team-row, .golfer-row {
-      border-bottom: 1px solid #eee;
-      transition: background-color 0.2s;
+    .team-row {
+      background-color: #fff;
+      border-bottom: 1px solid #006400;
       cursor: pointer;
+      transition: background-color 0.2s;
     }
     
-    .team-row:hover, .golfer-row:hover {
-      background-color: #f9f7e8; /* Very subtle yellow */
+    .team-row:hover {
+      background-color: #f8f0d0; /* Slightly darker on hover */
     }
     
-    .team-row td, .golfer-row td {
-      padding: 15px 10px;
+    .team-row td {
+      padding: 10px;
       text-align: center;
+      border: 1px solid #006400;
     }
     
     .player-column {
       text-align: left !important;
-      min-width: 200px;
     }
     
     .player-info {
       display: flex;
       align-items: center;
-      gap: 10px;
-    }
-    
-    .player-img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
     }
     
     .player-name {
-      font-weight: normal;
+      text-align: left;
+      font-weight: bold;
+      padding-left: 10px;
     }
     
-    .team-row .player-name {
-      font-weight: bold;
+    .golfers-container {
+      background-color: #fffbea; /* Very light yellow */
     }
     
     .golfers-table {
       width: 100%;
       border-collapse: collapse;
+      background-color: #fff8dc;
     }
     
-    .golfers-container {
-      background-color: #fdfcf7; /* Very light yellow/cream */
+    .golfer-row {
+      border-bottom: 1px solid #ddd;
     }
     
-    .pos-column {
-      width: 40px;
+    .golfer-row td {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #006400;
     }
     
-    .total-column, .round-column, .thru-column, .today-column {
-      width: 60px;
+    .golfer-row:hover {
+      background-color: #f8f0d0;
     }
     
-    .action-column {
-      width: 30px;
+    .total-column {
+      font-weight: bold;
     }
     
-    .track-btn, .fav-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #bbb;
-      transition: color 0.2s;
+    /* Add a subtle indicator that teams are clickable */
+    .team-row .player-name::after {
+      content: " ▼";
+      font-size: 0.8em;
+      color: #006400;
     }
     
-    .track-btn:hover, .fav-btn:hover {
-      color: #006747;
+    /* Change indicator when expanded */
+    .team-row.expanded .player-name::after {
+      content: " ▲";
     }
   `;
   document.head.appendChild(styleElement);
@@ -357,6 +288,14 @@ async function init() {
   const liveScores = await fetchLiveScores();
   addMastersStyles();
   renderLeaderboard(picks, liveScores);
+  
+  // Add expanded class toggle for visual indicator
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.team-row')) {
+      const teamRow = e.target.closest('.team-row');
+      teamRow.classList.toggle('expanded');
+    }
+  });
 }
 
 window.onload = init;
