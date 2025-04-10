@@ -15,16 +15,19 @@ async function fetchLiveScores() {
     const totalStrokes = row["TOT"] || row["Total"] || "0";
     const relativeScore = row["SCORE"] || row["RelativeScore"] || "E";
     
-    const r1 = parseInt(row["R1"]) || null;
-    const r2 = parseInt(row["R2"]) || null;
-    const r3 = parseInt(row["R3"]) || null;
-    const r4 = parseInt(row["R4"]) || null;
+    let r1 = parseInt(row["R1"]) || null;
+    let r2 = parseInt(row["R2"]) || null;
+    let r3 = parseInt(row["R3"]) || null;
+    let r4 = parseInt(row["R4"]) || null;
     
-    // Parse total strokes as integer
-    let totalStrokeCount = 0;
-    if (!isNaN(parseInt(totalStrokes))) {
-      totalStrokeCount = parseInt(totalStrokes);
-    }
+    // Assign 80 for unplayed rounds
+    if (r1 === null) r1 = 80;
+    if (r2 === null) r2 = 80;
+    if (r3 === null) r3 = 80;
+    if (r4 === null) r4 = 80;
+    
+    // Calculate total strokes with the 80-score replacement for missing rounds
+    let calculatedTotal = r1 + r2 + r3 + r4;
     
     // Parse relative score
     let relativeScoreValue = 0;
@@ -37,7 +40,7 @@ async function fetchLiveScores() {
     }
     
     scoreMap[name] = {
-      totalStrokes: totalStrokeCount,
+      totalStrokes: calculatedTotal, // Use calculated total with 80s for missing rounds
       relativeScore: relativeScoreValue,
       r1,
       r2,
@@ -48,18 +51,34 @@ async function fetchLiveScores() {
   return scoreMap;
 }
 
+function getTop6Scores(picks, liveScores) {
+  // Map each player to their score
+  const playerScores = picks.map(player => {
+    const playerName = player.trim();
+    const scoreData = liveScores[playerName] || { totalStrokes: 320, relativeScore: 0 }; // Default if player not found
+    return {
+      playerName,
+      totalStrokes: scoreData.totalStrokes,
+      relativeScore: scoreData.relativeScore,
+      rounds: [scoreData.r1, scoreData.r2, scoreData.r3, scoreData.r4]
+    };
+  });
+  
+  // Sort by totalStrokes (ascending)
+  playerScores.sort((a, b) => a.totalStrokes - b.totalStrokes);
+  
+  // Take only top 6
+  return playerScores.slice(0, 6);
+}
+
 function calculateTotalStrokes(picks, liveScores) {
-  return picks.reduce((total, player) => {
-    const strokes = liveScores[player.trim()]?.totalStrokes ?? 0;
-    return total + strokes;
-  }, 0);
+  const top6 = getTop6Scores(picks, liveScores);
+  return top6.reduce((total, player) => total + player.totalStrokes, 0);
 }
 
 function calculateRelativeScore(picks, liveScores) {
-  return picks.reduce((total, player) => {
-    const score = liveScores[player.trim()]?.relativeScore ?? 0;
-    return total + score;
-  }, 0);
+  const top6 = getTop6Scores(picks, liveScores);
+  return top6.reduce((total, player) => total + player.relativeScore, 0);
 }
 
 function formatRelativeScore(score) {
@@ -77,6 +96,7 @@ function renderLeaderboard(entries, liveScores) {
   mastersHeader.className = 'masters-header';
   mastersHeader.innerHTML = `
     <h2>2025 Masters Pool</h2>
+    <p>Scoring based on each team's top 6 players</p>
   `;
   container.appendChild(mastersHeader);
   
@@ -114,6 +134,7 @@ function renderLeaderboard(entries, liveScores) {
   const tableBody = document.createElement('tbody');
   
   entries.forEach((entry, index) => {
+    const top6Players = getTop6Scores(entry.picks, liveScores);
     const totalStrokes = calculateTotalStrokes(entry.picks, liveScores);
     const relativeScore = calculateRelativeScore(entry.picks, liveScores);
     const formattedRelative = formatRelativeScore(relativeScore);
@@ -150,24 +171,35 @@ function renderLeaderboard(entries, liveScores) {
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
     
-    // Add rows for each golfer
+    // Add rows for each golfer, indicating which ones are in the top 6
     entry.picks.forEach(player => {
-      const data = liveScores[player.trim()];
+      const playerName = player.trim();
+      const data = liveScores[playerName] || { 
+        totalStrokes: 320, 
+        relativeScore: 0,
+        r1: 80,
+        r2: 80,
+        r3: 80,
+        r4: 80
+      };
+      
+      const isTop6 = top6Players.some(p => p.playerName === playerName);
+      
       const golferRow = document.createElement('tr');
-      golferRow.className = 'golfer-row';
+      golferRow.className = `golfer-row ${isTop6 ? 'top-six' : ''}`;
       golferRow.innerHTML = `
-        <td class="pos-column"></td>
+        <td class="pos-column">${isTop6 ? '★' : ''}</td>
         <td class="player-column">
           <div class="player-info">
-            <span class="player-name">${player}</span>
+            <span class="player-name">${playerName}</span>
           </div>
         </td>
-        <td class="score-column">${formatRelativeScore(data?.relativeScore)}</td>
-        <td class="total-column">${data?.totalStrokes || ''}</td>
-        <td class="round-column">${data?.r1 || ''}</td>
-        <td class="round-column">${data?.r2 || ''}</td>
-        <td class="round-column">${data?.r3 || ''}</td>
-        <td class="round-column">${data?.r4 || ''}</td>
+        <td class="score-column">${formatRelativeScore(data.relativeScore)}</td>
+        <td class="total-column">${data.totalStrokes}</td>
+        <td class="round-column">${data.r1}</td>
+        <td class="round-column">${data.r2}</td>
+        <td class="round-column">${data.r3}</td>
+        <td class="round-column">${data.r4}</td>
       `;
       golfersTable.appendChild(golferRow);
     });
@@ -221,6 +253,12 @@ function addMastersStyles() {
       color: #006400;
       font-family: "Times New Roman", serif;
       margin: 0;
+    }
+    
+    .masters-header p {
+      color: #006400;
+      font-family: "Georgia", serif;
+      margin-top: 5px;
     }
     
     /* Table container for mobile scrolling */
@@ -303,6 +341,11 @@ function addMastersStyles() {
       padding: 8px;
       text-align: center;
       border: 1px solid #006400;
+    }
+    
+    .golfer-row.top-six {
+      background-color: #f0f8e8; /* Light green highlight for top 6 */
+      font-weight: bold;
     }
     
     .golfer-row:hover {
