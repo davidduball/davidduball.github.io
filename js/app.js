@@ -63,6 +63,9 @@ async function fetchLiveScores() {
       relativeScoreValue = 100;
     }
     
+    // Add prop score (assuming it's present in the data as PROPS or Props)
+    const propScore = parseInt(row["PROPS"] || row["Props"] || "0") || 0;
+    
     scoreMap[name] = {
       position: position,
       scoreDisplay: scoreDisplay,  // Original display value
@@ -78,7 +81,7 @@ async function fetchLiveScores() {
       r2: r2Value,
       r3: r3Value,
       r4: r4Value,
-      propScore: 0 // Adding prop score property (default to 0)
+      propScore: propScore // Using prop score from data, default to 0
     };
   });
   return scoreMap;
@@ -97,7 +100,7 @@ function getTop6Scores(picks, liveScores) {
       r3Display: "-",
       r4Display: "-",
       hasSpecialStatus: false,
-      totalStrokes: 0, // Default to 0 instead of 320
+      totalStrokes: 0,
       relativeScore: 0,
       r1: null,
       r2: null,
@@ -125,11 +128,11 @@ function getTop6Scores(picks, liveScores) {
     };
   });
   
-  // Sort by valid score data first, then by totalStrokes (ascending)
+  // Sort by relative score first (ascending)
   playerScores.sort((a, b) => {
-    // If both have same status regarding special status, compare by totalStrokes
+    // If both have same status regarding special status, compare by relative score
     if (a.hasSpecialStatus === b.hasSpecialStatus) {
-      return a.totalStrokes - b.totalStrokes;
+      return a.relativeScore - b.relativeScore;
     }
     // Otherwise, players without special status come first
     return a.hasSpecialStatus ? 1 : -1;
@@ -177,19 +180,19 @@ function renderLeaderboard(entries, liveScores) {
   `;
   container.appendChild(mastersHeader);
   
-  // Sort entries by total strokes first (lowest first), then by relative score if tied
+  // FIXED: Sort entries primarily by relative score first, then by total strokes if tied
   entries.sort((a, b) => {
-    const totalStrokesA = calculateTotalStrokes(a.picks, liveScores);
-    const totalStrokesB = calculateTotalStrokes(b.picks, liveScores);
+    const scoreA = calculateRelativeScore(a.picks, liveScores);
+    const scoreB = calculateRelativeScore(b.picks, liveScores);
     
-    if (totalStrokesA === totalStrokesB) {
-      // If total strokes are equal, use relative score as tie-breaker
-      const scoreA = calculateRelativeScore(a.picks, liveScores);
-      const scoreB = calculateRelativeScore(b.picks, liveScores);
-      return scoreA - scoreB;
+    if (scoreA === scoreB) {
+      // If relative scores are equal, use total strokes as tie-breaker
+      const totalStrokesA = calculateTotalStrokes(a.picks, liveScores);
+      const totalStrokesB = calculateTotalStrokes(b.picks, liveScores);
+      return totalStrokesA - totalStrokesB;
     }
     
-    return totalStrokesA - totalStrokesB;
+    return scoreA - scoreB;
   });
   
   // Add the main leaderboard table with container for scrolling on mobile
@@ -254,7 +257,7 @@ function renderLeaderboard(entries, liveScores) {
     golfersContainer.style.display = 'none';
     
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 9; // Updated to 9 to account for PROPS column
+    golfersCell.colSpan = 9; // Covers all 9 columns
     
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
