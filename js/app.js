@@ -10,17 +10,35 @@ async function fetchLiveScores() {
   data.forEach(row => {
     const name = (row["PLAYER"] || row["Name"] || "").trim();
     if (!name) return;
-    const totalRaw = row["TOT"] || row["Total"] || "E";
+    
+    // Get both raw total strokes and relative score
+    const totalStrokes = row["TOT"] || row["Total"] || "0";
+    const relativeScore = row["SCORE"] || row["RelativeScore"] || "E";
+    
     const r1 = parseInt(row["R1"]) || null;
     const r2 = parseInt(row["R2"]) || null;
     const r3 = parseInt(row["R3"]) || null;
     const r4 = parseInt(row["R4"]) || null;
-    let total = 0;
-    if (totalRaw === "E") total = 0;
-    else if (!isNaN(parseInt(totalRaw))) total = parseInt(totalRaw);
-    else if (totalRaw.startsWith("+") || totalRaw.startsWith("-")) total = parseInt(totalRaw);
+    
+    // Parse total strokes as integer
+    let totalStrokeCount = 0;
+    if (!isNaN(parseInt(totalStrokes))) {
+      totalStrokeCount = parseInt(totalStrokes);
+    }
+    
+    // Parse relative score
+    let relativeScoreValue = 0;
+    if (relativeScore === "E") {
+      relativeScoreValue = 0;
+    } else if (relativeScore.startsWith("+") || relativeScore.startsWith("-")) {
+      relativeScoreValue = parseInt(relativeScore);
+    } else if (!isNaN(parseInt(relativeScore))) {
+      relativeScoreValue = parseInt(relativeScore);
+    }
+    
     scoreMap[name] = {
-      total,
+      totalStrokes: totalStrokeCount,
+      relativeScore: relativeScoreValue,
       r1,
       r2,
       r3,
@@ -30,14 +48,21 @@ async function fetchLiveScores() {
   return scoreMap;
 }
 
-function calculateTotalScore(picks, liveScores) {
+function calculateTotalStrokes(picks, liveScores) {
   return picks.reduce((total, player) => {
-    const score = liveScores[player.trim()]?.total ?? 0;
+    const strokes = liveScores[player.trim()]?.totalStrokes ?? 0;
+    return total + strokes;
+  }, 0);
+}
+
+function calculateRelativeScore(picks, liveScores) {
+  return picks.reduce((total, player) => {
+    const score = liveScores[player.trim()]?.relativeScore ?? 0;
     return total + score;
   }, 0);
 }
 
-function formatScore(score) {
+function formatRelativeScore(score) {
   if (score === null || score === undefined || isNaN(score)) return '';
   if (score === 0) return 'E';
   return score > 0 ? `+${score}` : score;
@@ -55,10 +80,17 @@ function renderLeaderboard(entries, liveScores) {
   `;
   container.appendChild(mastersHeader);
   
-  // Sort entries by score
-  entries.sort((a, b) => calculateTotalScore(a.picks, liveScores) - calculateTotalScore(b.picks, liveScores));
+  // Sort entries by relative score (lowest/best scores at top)
+  entries.sort((a, b) => {
+    const scoreA = calculateRelativeScore(a.picks, liveScores);
+    const scoreB = calculateRelativeScore(b.picks, liveScores);
+    return scoreA - scoreB;
+  });
   
-  // Add the main leaderboard table
+  // Add the main leaderboard table with container for scrolling on mobile
+  const tableContainer = document.createElement('div');
+  tableContainer.className = 'table-container';
+  
   const leaderboardTable = document.createElement('table');
   leaderboardTable.className = 'main-leaderboard';
   
@@ -68,12 +100,12 @@ function renderLeaderboard(entries, liveScores) {
     <tr class="header-row">
       <th class="pos-column">POS</th>
       <th class="player-column">TEAM</th>
+      <th class="score-column">SCORE</th>
       <th class="total-column">TOTAL</th>
       <th class="round-column">R1</th>
       <th class="round-column">R2</th>
       <th class="round-column">R3</th>
       <th class="round-column">R4</th>
-      <th class="total-column">TOTAL</th>
     </tr>
   `;
   leaderboardTable.appendChild(tableHeader);
@@ -82,8 +114,9 @@ function renderLeaderboard(entries, liveScores) {
   const tableBody = document.createElement('tbody');
   
   entries.forEach((entry, index) => {
-    const totalScore = calculateTotalScore(entry.picks, liveScores);
-    const formattedScore = formatScore(totalScore);
+    const totalStrokes = calculateTotalStrokes(entry.picks, liveScores);
+    const relativeScore = calculateRelativeScore(entry.picks, liveScores);
+    const formattedRelative = formatRelativeScore(relativeScore);
     
     // Team header row (collapsible)
     const teamRow = document.createElement('tr');
@@ -96,12 +129,12 @@ function renderLeaderboard(entries, liveScores) {
           <span class="player-name">${entry.name}</span>
         </div>
       </td>
-      <td class="total-column">${formattedScore}</td>
+      <td class="score-column">${formattedRelative}</td>
+      <td class="total-column">${totalStrokes}</td>
       <td class="round-column"></td>
       <td class="round-column"></td>
       <td class="round-column"></td>
       <td class="round-column"></td>
-      <td class="total-column">${formattedScore}</td>
     `;
     tableBody.appendChild(teamRow);
     
@@ -129,12 +162,12 @@ function renderLeaderboard(entries, liveScores) {
             <span class="player-name">${player}</span>
           </div>
         </td>
-        <td class="total-column">${formatScore(data?.total)}</td>
+        <td class="score-column">${formatRelativeScore(data?.relativeScore)}</td>
+        <td class="total-column">${data?.totalStrokes || ''}</td>
         <td class="round-column">${data?.r1 || ''}</td>
         <td class="round-column">${data?.r2 || ''}</td>
         <td class="round-column">${data?.r3 || ''}</td>
         <td class="round-column">${data?.r4 || ''}</td>
-        <td class="total-column">${formatScore(data?.total)}</td>
       `;
       golfersTable.appendChild(golferRow);
     });
@@ -148,14 +181,17 @@ function renderLeaderboard(entries, liveScores) {
       const golfersElement = document.getElementById(`team-${index}-golfers`);
       if (golfersElement.style.display === 'none') {
         golfersElement.style.display = 'table-row';
+        this.classList.add('expanded');
       } else {
         golfersElement.style.display = 'none';
+        this.classList.remove('expanded');
       }
     });
   });
   
   leaderboardTable.appendChild(tableBody);
-  container.appendChild(leaderboardTable);
+  tableContainer.appendChild(leaderboardTable);
+  container.appendChild(tableContainer);
 }
 
 // Add this CSS to your stylesheet
@@ -169,7 +205,7 @@ function addMastersStyles() {
     }
     
     #leaderboard {
-      background-color: #fff8dc; /* Using your existing yellow background */
+      background-color: #f9e79f; /* Using your existing yellow background */
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -185,6 +221,13 @@ function addMastersStyles() {
       color: #006400;
       font-family: "Times New Roman", serif;
       margin: 0;
+    }
+    
+    /* Table container for mobile scrolling */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
     }
     
     .main-leaderboard {
@@ -206,6 +249,7 @@ function addMastersStyles() {
       font-weight: bold;
       text-align: center;
       border: 1px solid #006400;
+      white-space: nowrap; /* Prevent wrapping on mobile */
     }
     
     .team-row {
@@ -227,6 +271,7 @@ function addMastersStyles() {
     
     .player-column {
       text-align: left !important;
+      min-width: 150px; /* Ensure player names have enough space */
     }
     
     .player-info {
@@ -264,8 +309,12 @@ function addMastersStyles() {
       background-color: #f8f0d0;
     }
     
-    .total-column {
+    .score-column {
       font-weight: bold;
+    }
+    
+    .total-column {
+      font-weight: normal;
     }
     
     /* Add a subtle indicator that teams are clickable */
@@ -279,6 +328,36 @@ function addMastersStyles() {
     .team-row.expanded .player-name::after {
       content: " ▲";
     }
+    
+    /* Mobile responsiveness */
+    @media screen and (max-width: 768px) {
+      #leaderboard {
+        padding: 10px;
+      }
+      
+      .masters-header h2 {
+        font-size: 20px;
+      }
+      
+      .main-leaderboard, .golfers-table {
+        font-size: 14px;
+      }
+      
+      .team-row td, .golfer-row td, .header-row th {
+        padding: 8px 5px;
+      }
+      
+      /* Hide less important columns on very small screens */
+      @media screen and (max-width: 480px) {
+        .round-column:nth-child(n+2) {
+          display: none;
+        }
+        
+        .player-column {
+          min-width: 100px;
+        }
+      }
+    }
   `;
   document.head.appendChild(styleElement);
 }
@@ -288,14 +367,6 @@ async function init() {
   const liveScores = await fetchLiveScores();
   addMastersStyles();
   renderLeaderboard(picks, liveScores);
-  
-  // Add expanded class toggle for visual indicator
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.team-row')) {
-      const teamRow = e.target.closest('.team-row');
-      teamRow.classList.toggle('expanded');
-    }
-  });
 }
 
 window.onload = init;
