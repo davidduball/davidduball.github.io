@@ -14,6 +14,8 @@ async function fetchLiveScores() {
     // Get both raw total strokes and relative score
     const totalStrokes = row["TOT"] || row["Total"] || "0";
     const relativeScore = row["SCORE"] || row["RelativeScore"] || "E";
+    // Get player position from leaderboard
+    const position = row["POS"] || row["Position"] || "-";
     
     let r1 = parseInt(row["R1"]) || null;
     let r2 = parseInt(row["R2"]) || null;
@@ -40,6 +42,7 @@ async function fetchLiveScores() {
     }
     
     scoreMap[name] = {
+      position: position,
       totalStrokes: calculatedTotal, // Use calculated total with 80s for missing rounds
       relativeScore: relativeScoreValue,
       r1,
@@ -55,9 +58,18 @@ function getTop6Scores(picks, liveScores) {
   // Map each player to their score
   const playerScores = picks.map(player => {
     const playerName = player.trim();
-    const scoreData = liveScores[playerName] || { totalStrokes: 320, relativeScore: 0 }; // Default if player not found
+    const scoreData = liveScores[playerName] || { 
+      position: "-", 
+      totalStrokes: 320, 
+      relativeScore: 0,
+      r1: 80,
+      r2: 80,
+      r3: 80,
+      r4: 80
+    };
     return {
       playerName,
+      position: scoreData.position,
       totalStrokes: scoreData.totalStrokes,
       relativeScore: scoreData.relativeScore,
       rounds: [scoreData.r1, scoreData.r2, scoreData.r3, scoreData.r4]
@@ -175,6 +187,7 @@ function renderLeaderboard(entries, liveScores) {
     entry.picks.forEach(player => {
       const playerName = player.trim();
       const data = liveScores[playerName] || { 
+        position: "-",
         totalStrokes: 320, 
         relativeScore: 0,
         r1: 80,
@@ -188,7 +201,7 @@ function renderLeaderboard(entries, liveScores) {
       const golferRow = document.createElement('tr');
       golferRow.className = `golfer-row ${isTop6 ? 'top-six' : ''}`;
       golferRow.innerHTML = `
-        <td class="pos-column">${isTop6 ? '★' : ''}</td>
+        <td class="pos-column">${data.position}</td>
         <td class="player-column">
           <div class="player-info">
             <span class="player-name">${playerName}</span>
@@ -350,6 +363,11 @@ function addMastersStyles() {
     
     .golfer-row:hover {
       background-color: #f8f0d0;
+    }
+    
+    .pos-column {
+      width: 40px;
+      text-align: center;
     }
     
     .score-column {
