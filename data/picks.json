@@ -882,5 +882,39 @@
       "Low golfer who wears a non-baseball cap": "Joe Highsmith",
       "Should Aaron Rai be allowed to play with two gloves and iron covers?": "Yes"
     }
+  },
+  {
+  "name": "Gabby",
+  "picks": [
+    "Rory McIlroy",
+    "Collin Morikawa",
+    "Cameron Smith",
+    "Robert MacIntyre",
+    "Patrick Reed",
+    "Lucas Glover",
+    "Harris English",
+    "Nick Dunlap",
+    "Tom Kim",
+    "Noah Kent (a) - US Amateur runner-up"
+  ],
+  "props": {
+    "Which LIV team will have the best showing?": "Fireballs (Sergio Garcia)",
+    "Will someone other than Scottie Scheffler or Rory McIlroy win the tournament?": "Scottie / Rory",
+    "Low Apostle": "Jon Rahm",
+    "Low Old Timer": "Phil Mickelson",
+    "Low Amateur": "Hiroshi Tai (NCAA champ)",
+    "Low Cameron": "Cameron Smith",
+    "Low scorer from Great Britain or Ireland": "Robert MacIntyre",
+    "Low Texan": "Scottie Scheffler",
+    "Low Spanish Speaker": "Sergio Garcia",
+    "What color polo will the 54 hole leader wear on Sunday?*\n\n*this question is sponsored by the green hat green glove combo Charley Hoffman wore playing in the second to last pairing on Sunday in 2015": "gray",
+    "Willett or Spieth?": "Jordan Spieth",
+    "Low Amateur or Bernhard Langer?": "Low Amateur",
+    "Will a golfer sponsored by a workplace solutions product (SAP, ADP, Workday, etc.) place in the top 5?": "Yes",
+    "Who cries first, the golfer or the wife?": "golfer",
+    "What pattern tie will Jim Nantz be wearing on Sunday?": "Striped",
+    "Low golfer who wears a non-baseball cap": "Joe Highsmith",
+    "Should Aaron Rai be allowed to play with two gloves and iron covers?": "No"
   }
+}
 ]
