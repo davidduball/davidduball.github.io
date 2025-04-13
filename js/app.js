@@ -179,6 +179,12 @@ function renderLeaderboard(entries, liveScores) {
     <p>Scoring based on each team's top 6 players</p>
   `;
   container.appendChild(mastersHeader);
+
+  const propsLink = document.createElement('div');
+  propsLink.className = 'props-link';
+  propsLink.innerHTML = `<a href="props.html" style="color:#006400;font-weight:bold;text-decoration:none;">View Prop Picks</a>`;
+  container.appendChild(propsLink);
+
   
   // FIXED: Sort entries primarily by relative score first, then by total strokes if tied
   entries.sort((a, b) => {
