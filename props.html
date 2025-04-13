@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2025 Masters Pool - Prop Picks</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #006400;
+      font-family: "Times New Roman", serif;
+      margin-bottom: 20px;
+    }
+
+    .props-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Georgia, serif;
+      font-size: 15px;
+      background-color: #fff8dc;
+    }
+
+    .props-table th,
+    .props-table td {
+      border: 1px solid #006400;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .props-table th {
+      background-color: #006400;
+      color: white;
+      font-weight: bold;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      color: #006400;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>2025 Masters Pool – Prop Picks</h1>
+    <div id="props"></div>
+    <div class="back-link">
+      <a href="leaderboardb.html">← Back to Leaderboard</a>
+    </div>
+  </div>
+
+  <script>
+    async function fetchProps() {
+      const res = await fetch('data/picks.json');
+      return await res.json();
+    }
+
+    function renderPropsTable(data) {
+      const container = document.getElementById('props');
+      if (!data.length) {
+        container.innerHTML = '<p>No prop picks found.</p>';
+        return;
+      }
+
+      const questions = Object.keys(data[0].props);
+
+      let html = '<table class="props-table">';
+      html += '<thead><tr><th>Name</th>' + questions.map(q => `<th>${q}</th>`).join('') + '</tr></thead>';
+      html += '<tbody>';
+
+      data.forEach(entry => {
+        html += `<tr><td>${entry.name}</td>`;
+        questions.forEach(q => {
+          html += `<td>${entry.props[q] || ''}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function init() {
+      const picks = await fetchProps();
+      renderPropsTable(picks);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
