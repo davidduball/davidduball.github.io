@@ -169,8 +169,12 @@ function renderLeaderboard(entries, liveScores) {
         <th class="pos-column">POS</th>
         <th class="player-column">TEAM</th>
         <th class="score-column">SCORE</th>
-        <th class="total-column">TEAM TOTAL</th>
-        <th class="total-column">TOTAL SCORE</th>
+        <th class="total-column">Team Total</th>
+        <th class="props-column">PROPS</th>
+        <th class="round-column">R1</th>
+        <th class="round-column">R2</th>
+        <th class="round-column">R3</th>
+        <th class="round-column">R4</th>
       </tr>
     </thead>
   `;
@@ -182,7 +186,6 @@ function renderLeaderboard(entries, liveScores) {
     const relativeScore = calculateRelativeScore(entry.picks, liveScores);
     const formattedRelative = formatRelativeScore(relativeScore);
     const propScore = calculateTotalPropScore(entry.picks, liveScores);
-    const totalCombinedScore = totalStrokes + propScore;
 
     const teamRow = document.createElement('tr');
     teamRow.className = 'team-row';
@@ -192,7 +195,11 @@ function renderLeaderboard(entries, liveScores) {
       <td class="player-column"><div class="player-info"><span class="player-name">${entry.name}</span></div></td>
       <td class="score-column">${formattedRelative}</td>
       <td class="total-column">${totalStrokes}</td>
-      <td class="total-column">${totalCombinedScore}</td>
+      <td class="props-column">${propScore}</td>
+      <td class="round-column"></td>
+      <td class="round-column"></td>
+      <td class="round-column"></td>
+      <td class="round-column"></td>
     `;
     tableBody.appendChild(teamRow);
 
@@ -202,7 +209,7 @@ function renderLeaderboard(entries, liveScores) {
     golfersContainer.style.display = 'none';
 
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 5;
+    golfersCell.colSpan = 9;
 
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
@@ -213,6 +220,7 @@ function renderLeaderboard(entries, liveScores) {
         <th class="player-column">PLAYER</th>
         <th class="score-column">SCORE</th>
         <th class="total-column">TOTAL</th>
+        <th class="props-column">PROPS</th>
         <th class="round-column">R1</th>
         <th class="round-column">R2</th>
         <th class="round-column">R3</th>
@@ -232,6 +240,7 @@ function renderLeaderboard(entries, liveScores) {
         <td class="player-column"><div class="player-info"><span class="player-name">${playerName}</span></div></td>
         <td class="score-column">${data.scoreDisplay || 'E'}</td>
         <td class="total-column">${data.totalDisplay || '0'}</td>
+        <td class="props-column">${data.propScore}</td>
         <td class="round-column">${data.r1Display || '-'}</td>
         <td class="round-column">${data.r2Display || '-'}</td>
         <td class="round-column">${data.r3Display || '-'}</td>
