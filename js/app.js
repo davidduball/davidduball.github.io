@@ -15,41 +15,20 @@ async function fetchLiveScores() {
     const scoreDisplay = row["SCORE"] || row["RelativeScore"] || "E";
     const totalDisplay = row["TOT"] || row["Total"] || "0";
 
-    const r1Display = row["R1"] || "-";
-    const r2Display = row["R2"] || "-";
-    const r3Display = row["R3"] || "-";
-    const r4Display = row["R4"] || "-";
-
-    let r1Value = parseInt(row["R1"]) || null;
-    let r2Value = parseInt(row["R2"]) || null;
-    let r3Value = parseInt(row["R3"]) || null;
-    let r4Value = parseInt(row["R4"]) || null;
+    const r1Value = parseInt(row["R1"]) || null;
+    const r2Value = parseInt(row["R2"]) || null;
+    const r3Value = parseInt(row["R3"]) || null;
+    const r4Value = parseInt(row["R4"]) || null;
 
     const hasSpecialStatus = typeof scoreDisplay === 'string' && ["CUT", "WD", "DQ", "DNS"].includes(scoreDisplay);
 
-    if (hasSpecialStatus) {
-      if (r1Value === null) r1Value = 80;
-      if (r2Value === null) r2Value = 80;
-      if (r3Value === null) r3Value = 80;
-      if (r4Value === null) r4Value = 80;
-    }
-
-    let calculatedTotal = 0;
-    if (r1Value !== null) calculatedTotal += r1Value;
-    if (r2Value !== null) calculatedTotal += r2Value;
-    if (r3Value !== null) calculatedTotal += r3Value;
-    if (r4Value !== null) calculatedTotal += r4Value;
+    const rounds = [r1Value, r2Value, r3Value, r4Value];
+    const calculatedTotal = rounds.reduce((acc, val) => acc + (val !== null ? val : (hasSpecialStatus ? 80 : 0)), 0);
 
     let relativeScoreValue = 0;
-    if (scoreDisplay === "E") {
-      relativeScoreValue = 0;
-    } else if (typeof scoreDisplay === 'string' && (scoreDisplay.startsWith("+") || scoreDisplay.startsWith("-"))) {
-      relativeScoreValue = parseInt(scoreDisplay);
-    } else if (!isNaN(parseInt(scoreDisplay))) {
-      relativeScoreValue = parseInt(scoreDisplay);
-    } else if (hasSpecialStatus) {
-      relativeScoreValue = 100;
-    }
+    if (scoreDisplay === "E") relativeScoreValue = 0;
+    else if (!isNaN(parseInt(scoreDisplay))) relativeScoreValue = parseInt(scoreDisplay);
+    else if (hasSpecialStatus) relativeScoreValue = 100;
 
     const propScore = parseInt(row["PROPS"] || row["Props"] || "0") || 0;
 
@@ -57,17 +36,9 @@ async function fetchLiveScores() {
       position,
       scoreDisplay,
       totalDisplay,
-      r1Display,
-      r2Display,
-      r3Display,
-      r4Display,
       hasSpecialStatus,
       totalStrokes: calculatedTotal,
       relativeScore: relativeScoreValue,
-      r1: r1Value,
-      r2: r2Value,
-      r3: r3Value,
-      r4: r4Value,
       propScore
     };
   });
@@ -81,17 +52,9 @@ function getTop6Scores(picks, liveScores) {
       position: "-",
       scoreDisplay: "E",
       totalDisplay: "0",
-      r1Display: "-",
-      r2Display: "-",
-      r3Display: "-",
-      r4Display: "-",
       hasSpecialStatus: false,
       totalStrokes: 0,
       relativeScore: 0,
-      r1: null,
-      r2: null,
-      r3: null,
-      r4: null,
       propScore: 0
     };
     return {
@@ -171,10 +134,7 @@ function renderLeaderboard(entries, liveScores) {
         <th class="score-column">SCORE</th>
         <th class="total-column">Team Total</th>
         <th class="props-column">PROPS</th>
-        <th class="round-column">R1</th>
-        <th class="round-column">R2</th>
-        <th class="round-column">R3</th>
-        <th class="round-column">R4</th>
+        <th class="combined-column">Total Score</th>
       </tr>
     </thead>
   `;
@@ -186,6 +146,7 @@ function renderLeaderboard(entries, liveScores) {
     const relativeScore = calculateRelativeScore(entry.picks, liveScores);
     const formattedRelative = formatRelativeScore(relativeScore);
     const propScore = calculateTotalPropScore(entry.picks, liveScores);
+    const combinedScore = totalStrokes + propScore;
 
     const teamRow = document.createElement('tr');
     teamRow.className = 'team-row';
@@ -196,10 +157,7 @@ function renderLeaderboard(entries, liveScores) {
       <td class="score-column">${formattedRelative}</td>
       <td class="total-column">${totalStrokes}</td>
       <td class="props-column">${propScore}</td>
-      <td class="round-column"></td>
-      <td class="round-column"></td>
-      <td class="round-column"></td>
-      <td class="round-column"></td>
+      <td class="combined-column">${combinedScore}</td>
     `;
     tableBody.appendChild(teamRow);
 
@@ -209,7 +167,7 @@ function renderLeaderboard(entries, liveScores) {
     golfersContainer.style.display = 'none';
 
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 9;
+    golfersCell.colSpan = 6;
 
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
@@ -220,11 +178,6 @@ function renderLeaderboard(entries, liveScores) {
         <th class="player-column">PLAYER</th>
         <th class="score-column">SCORE</th>
         <th class="total-column">TOTAL</th>
-        <th class="props-column">PROPS</th>
-        <th class="round-column">R1</th>
-        <th class="round-column">R2</th>
-        <th class="round-column">R3</th>
-        <th class="round-column">R4</th>
       </tr>
     `;
 
@@ -240,11 +193,6 @@ function renderLeaderboard(entries, liveScores) {
         <td class="player-column"><div class="player-info"><span class="player-name">${playerName}</span></div></td>
         <td class="score-column">${data.scoreDisplay || 'E'}</td>
         <td class="total-column">${data.totalDisplay || '0'}</td>
-        <td class="props-column">${data.propScore}</td>
-        <td class="round-column">${data.r1Display || '-'}</td>
-        <td class="round-column">${data.r2Display || '-'}</td>
-        <td class="round-column">${data.r3Display || '-'}</td>
-        <td class="round-column">${data.r4Display || '-'}</td>
       `;
       golfersTable.appendChild(golferRow);
     });
