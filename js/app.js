@@ -299,10 +299,6 @@ function renderLeaderboard(entries, scoresData) {
       <th class="player-column">PLAYER</th>
       <th class="score-column">SCORE</th>
       <th class="total-column">TOTAL</th>
-      <th class="round-column">R1</th>
-      <th class="round-column">R2</th>
-      <th class="round-column">R3</th>
-      <th class="round-column">R4</th>
     `;
     golfersTable.appendChild(golfersHeader);
     
