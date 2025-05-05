@@ -233,7 +233,7 @@ function renderLeaderboard(entries, scoresData) {
       <tr class="header-row">
         <th class="pos-column">POS</th>
         <th class="player-column">TEAM</th>
-        <th class="score-column">GOLF</th>
+        <th class="score-column">TEAM SCORE</th>
         <th class="props-column">PROPS</th>
         <th class="adjusted-column">NET</th>
         <th class="total-column">TOTAL</th>
