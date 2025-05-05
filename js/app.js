@@ -3,13 +3,27 @@ async function fetchPicks() {
   return await res.json();
 }
 
-async function fetchLiveScores() {
+async function fetchLiveScoresAndProps() {
   const res = await fetch("https://script.google.com/macros/s/AKfycbw7e11zGyZ-kOAvjuQXjQgO2Tc2rAiKEU8Gl31FpMGCTbocK4iqd53PFC4U19_5LOkW/exec");
   const data = await res.json();
-  const scoreMap = {};
+  
+  // Create an object to store both golfer scores and team prop scores
+  const result = {
+    golferScores: {},
+    teamPropScores: {}
+  };
+  
   data.forEach(row => {
+    // Process golfer data
     const name = (row["PLAYER"] || row["Name"] || "").trim();
     if (!name) return;
+    
+    // If this row represents a team entry with prop scores
+    if (row["TeamEntry"] === true || row["isTeam"] === true) {
+      // Save team prop score
+      result.teamPropScores[name] = parseInt(row["Props"] || "0") || 0;
+      return;
+    }
     
     // Get the raw values from the data
     const position = row["POS"] || row["Position"] || "-";
@@ -63,10 +77,7 @@ async function fetchLiveScores() {
       relativeScoreValue = 100;
     }
     
-    // Add prop score (assuming it's present in the data as PROPS or Props)
-    const propScore = parseInt(row["PROPS"] || row["Props"] || "0") || 0;
-    
-    scoreMap[name] = {
+    result.golferScores[name] = {
       position: position,
       scoreDisplay: scoreDisplay,  // Original display value
       totalDisplay: totalDisplay,  // Original display value
@@ -80,18 +91,18 @@ async function fetchLiveScores() {
       r1: r1Value,
       r2: r2Value,
       r3: r3Value,
-      r4: r4Value,
-      propScore: propScore // Using prop score from data, default to 0
+      r4: r4Value
     };
   });
-  return scoreMap;
+  
+  return result;
 }
 
-function getTop6Scores(picks, liveScores) {
+function getTop6Scores(picks, golferScores) {
   // Map each player to their score
   const playerScores = picks.map(player => {
     const playerName = player.trim();
-    const scoreData = liveScores[playerName] || { 
+    const scoreData = golferScores[playerName] || { 
       position: "-", 
       scoreDisplay: "E",
       totalDisplay: "0",
@@ -105,8 +116,7 @@ function getTop6Scores(picks, liveScores) {
       r1: null,
       r2: null,
       r3: null,
-      r4: null,
-      propScore: 0
+      r4: null
     };
     return {
       playerName,
@@ -123,8 +133,7 @@ function getTop6Scores(picks, liveScores) {
       r1: scoreData.r1,
       r2: scoreData.r2,
       r3: scoreData.r3,
-      r4: scoreData.r4,
-      propScore: scoreData.propScore
+      r4: scoreData.r4
     };
   });
   
@@ -142,29 +151,26 @@ function getTop6Scores(picks, liveScores) {
   return playerScores.slice(0, 6);
 }
 
-function calculateTotalStrokes(picks, liveScores) {
-  const top6 = getTop6Scores(picks, liveScores);
+function calculateTotalStrokes(picks, golferScores) {
+  const top6 = getTop6Scores(picks, golferScores);
   return top6.reduce((total, player) => total + player.totalStrokes, 0);
 }
 
-function calculateRelativeScore(picks, liveScores) {
-  const top6 = getTop6Scores(picks, liveScores);
+function calculateRelativeScore(picks, golferScores) {
+  const top6 = getTop6Scores(picks, golferScores);
   return top6.reduce((total, player) => total + player.relativeScore, 0);
 }
 
-function calculateTotalPropScore(picks, liveScores) {
-  // Sum up prop scores for all players in the team
-  return picks.reduce((total, player) => {
-    const playerName = player.trim();
-    const scoreData = liveScores[playerName] || { propScore: 0 };
-    return total + (scoreData.propScore || 0);
-  }, 0);
+// NEW FUNCTION: Get prop score for a team entry
+function getTeamPropScore(teamName, teamPropScores) {
+  // Return the prop score for the team, or 0 if not found
+  return teamPropScores[teamName] || 0;
 }
 
-// NEW FUNCTION: Calculate adjusted score with props subtracted
-function calculateAdjustedScore(picks, liveScores) {
-  const relativeScore = calculateRelativeScore(picks, liveScores);
-  const propScore = calculateTotalPropScore(picks, liveScores);
+// Calculate adjusted score with props subtracted
+function calculateAdjustedScore(picks, golferScores, teamName, teamPropScores) {
+  const relativeScore = calculateRelativeScore(picks, golferScores);
+  const propScore = getTeamPropScore(teamName, teamPropScores);
   return relativeScore - propScore; // Subtract prop points from relative score
 }
 
@@ -174,7 +180,8 @@ function formatRelativeScore(score) {
   return score > 0 ? `+${score}` : score;
 }
 
-function renderLeaderboard(entries, liveScores) {
+function renderLeaderboard(entries, data) {
+  const { golferScores, teamPropScores } = data;
   const container = document.getElementById('leaderboard');
   container.innerHTML = '';
   
@@ -194,12 +201,12 @@ function renderLeaderboard(entries, liveScores) {
   
   // UPDATED: Sort entries primarily by adjusted score (relative score - prop points)
   entries.sort((a, b) => {
-    const scoreA = calculateAdjustedScore(a.picks, liveScores);
-    const scoreB = calculateAdjustedScore(b.picks, liveScores);
+    const scoreA = calculateAdjustedScore(a.picks, golferScores, a.name, teamPropScores);
+    const scoreB = calculateAdjustedScore(b.picks, golferScores, b.name, teamPropScores);
     
     if (scoreA === scoreB) {
       // If adjusted scores are equal, use total strokes as tie-breaker
-      return calculateTotalStrokes(a.picks, liveScores) - calculateTotalStrokes(b.picks, liveScores);
+      return calculateTotalStrokes(a.picks, golferScores) - calculateTotalStrokes(b.picks, golferScores);
     }
     
     return scoreA - scoreB;
@@ -234,12 +241,12 @@ function renderLeaderboard(entries, liveScores) {
   const tableBody = document.createElement('tbody');
   
   entries.forEach((entry, index) => {
-    const top6Players = getTop6Scores(entry.picks, liveScores);
-    const totalStrokes = calculateTotalStrokes(entry.picks, liveScores);
-    const relativeScore = calculateRelativeScore(entry.picks, liveScores);
+    const top6Players = getTop6Scores(entry.picks, golferScores);
+    const totalStrokes = calculateTotalStrokes(entry.picks, golferScores);
+    const relativeScore = calculateRelativeScore(entry.picks, golferScores);
     const formattedRelative = formatRelativeScore(relativeScore);
-    const propScore = calculateTotalPropScore(entry.picks, liveScores);
-    const adjustedScore = calculateAdjustedScore(entry.picks, liveScores);
+    const propScore = getTeamPropScore(entry.name, teamPropScores);
+    const adjustedScore = calculateAdjustedScore(entry.picks, golferScores, entry.name, teamPropScores);
     const formattedAdjusted = formatRelativeScore(adjustedScore);
     
     // Team header row (collapsible)
@@ -271,7 +278,7 @@ function renderLeaderboard(entries, liveScores) {
     golfersContainer.style.display = 'none';
     
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 10; // Updated to cover all 10 columns
+    golfersCell.colSpan = 10; // Covers all 10 columns
     
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
@@ -283,7 +290,6 @@ function renderLeaderboard(entries, liveScores) {
       <th class="pos-column">POS</th>
       <th class="player-column">PLAYER</th>
       <th class="score-column">SCORE</th>
-      <th class="props-column">PROPS</th>
       <th class="total-column">TOTAL</th>
       <th class="round-column">R1</th>
       <th class="round-column">R2</th>
@@ -295,7 +301,7 @@ function renderLeaderboard(entries, liveScores) {
     // Add rows for each golfer, indicating which ones are in the top 6
     entry.picks.forEach(player => {
       const playerName = player.trim();
-      const data = liveScores[playerName] || { 
+      const data = golferScores[playerName] || { 
         position: "-",
         scoreDisplay: "E",
         totalDisplay: "0",
@@ -309,8 +315,7 @@ function renderLeaderboard(entries, liveScores) {
         r1: null,
         r2: null,
         r3: null,
-        r4: null,
-        propScore: 0
+        r4: null
       };
       
       const isTop6 = top6Players.some(p => p.playerName === playerName);
@@ -318,44 +323,6 @@ function renderLeaderboard(entries, liveScores) {
       const golferRow = document.createElement('tr');
       golferRow.className = `golfer-row ${isTop6 ? 'top-six' : ''} ${data.hasSpecialStatus ? 'special-status' : ''}`;
       golferRow.innerHTML = `
-        <td class="pos-column">${data.position}</td>
-        <td class="player-column">
-          <div class="player-info">
-            <span class="player-name">${playerName}</span>
-          </div>
-        </td>
-        <td class="score-column">${data.scoreDisplay}</td>
-        <td class="props-column">${data.propScore}</td>
-        <td class="total-column">${data.totalDisplay}</td>
-        <td class="round-column">${data.r1Display}</td>
-        <td class="round-column">${data.r2Display}</td>
-        <td class="round-column">${data.r3Display}</td>
-        <td class="round-column">${data.r4Display}</td>
-      `;
-      golfersTable.appendChild(golferRow);
-    });
-    
-    golfersCell.appendChild(golfersTable);
-    golfersContainer.appendChild(golfersCell);
-    tableBody.appendChild(golfersContainer);
-    
-    // Add click event to toggle golfer visibility
-    teamRow.addEventListener('click', function() {
-      const golfersElement = document.getElementById(`team-${index}-golfers`);
-      if (golfersElement.style.display === 'none') {
-        golfersElement.style.display = 'table-row';
-        this.classList.add('expanded');
-      } else {
-        golfersElement.style.display = 'none';
-        this.classList.remove('expanded');
-      }
-    });
-  });
-  
-  leaderboardTable.appendChild(tableBody);
-  tableContainer.appendChild(leaderboardTable);
-  container.appendChild(tableContainer);
-}
 
 // Add this CSS to your stylesheet
 function addMastersStyles() {
