@@ -161,7 +161,7 @@ function calculateRelativeScore(picks, golferScores) {
   return top6.reduce((total, player) => total + player.relativeScore, 0);
 }
 
-// NEW FUNCTION: Get prop score for a team entry
+// Get prop score for a team entry
 function getTeamPropScore(teamName, teamPropScores) {
   // Return the prop score for the team, or 0 if not found
   return teamPropScores[teamName] || 0;
@@ -174,16 +174,24 @@ function calculateAdjustedScore(picks, golferScores, teamName, teamPropScores) {
   return relativeScore - propScore; // Subtract prop points from relative score
 }
 
+// NEW FUNCTION: Calculate total prop score for a team
+function calculateTotalPropScore(teamName, teamPropScores) {
+  // Return the prop score for the team entry
+  return teamPropScores[teamName] || 0;
+}
+
 function formatRelativeScore(score) {
   if (score === null || score === undefined || isNaN(score)) return '';
   if (score === 0) return 'E';
   return score > 0 ? `+${score}` : score;
 }
 
-function renderLeaderboard(entries, data) {
-  const { golferScores, teamPropScores } = data;
+function renderLeaderboard(entries, scoresData) {
   const container = document.getElementById('leaderboard');
   container.innerHTML = '';
+  
+  // Extract golfer scores and team prop scores from the data
+  const { golferScores, teamPropScores } = scoresData;
   
   // Create the Masters header
   const mastersHeader = document.createElement('div');
@@ -245,7 +253,7 @@ function renderLeaderboard(entries, data) {
     const totalStrokes = calculateTotalStrokes(entry.picks, golferScores);
     const relativeScore = calculateRelativeScore(entry.picks, golferScores);
     const formattedRelative = formatRelativeScore(relativeScore);
-    const propScore = getTeamPropScore(entry.name, teamPropScores);
+    const propScore = calculateTotalPropScore(entry.name, teamPropScores);
     const adjustedScore = calculateAdjustedScore(entry.picks, golferScores, entry.name, teamPropScores);
     const formattedAdjusted = formatRelativeScore(adjustedScore);
     
@@ -278,7 +286,7 @@ function renderLeaderboard(entries, data) {
     golfersContainer.style.display = 'none';
     
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 10; // Covers all 10 columns
+    golfersCell.colSpan = 10; // Updated to cover all 10 columns
     
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
@@ -323,6 +331,43 @@ function renderLeaderboard(entries, data) {
       const golferRow = document.createElement('tr');
       golferRow.className = `golfer-row ${isTop6 ? 'top-six' : ''} ${data.hasSpecialStatus ? 'special-status' : ''}`;
       golferRow.innerHTML = `
+        <td class="pos-column">${data.position}</td>
+        <td class="player-column">
+          <div class="player-info">
+            <span class="player-name">${playerName}</span>
+          </div>
+        </td>
+        <td class="score-column">${data.scoreDisplay}</td>
+        <td class="total-column">${data.totalDisplay}</td>
+        <td class="round-column">${data.r1Display}</td>
+        <td class="round-column">${data.r2Display}</td>
+        <td class="round-column">${data.r3Display}</td>
+        <td class="round-column">${data.r4Display}</td>
+      `;
+      golfersTable.appendChild(golferRow);
+    });
+    
+    golfersCell.appendChild(golfersTable);
+    golfersContainer.appendChild(golfersCell);
+    tableBody.appendChild(golfersContainer);
+    
+    // Add click event to toggle golfer visibility
+    teamRow.addEventListener('click', function() {
+      const golfersElement = document.getElementById(`team-${index}-golfers`);
+      if (golfersElement.style.display === 'none') {
+        golfersElement.style.display = 'table-row';
+        this.classList.add('expanded');
+      } else {
+        golfersElement.style.display = 'none';
+        this.classList.remove('expanded');
+      }
+    });
+  });
+  
+  leaderboardTable.appendChild(tableBody);
+  tableContainer.appendChild(leaderboardTable);
+  container.appendChild(tableContainer);
+}
 
 // Add this CSS to your stylesheet
 function addMastersStyles() {
@@ -528,9 +573,9 @@ function addMastersStyles() {
 
 async function init() {
   const picks = await fetchPicks();
-  const liveScores = await fetchLiveScores();
+  const scoresData = await fetchLiveScoresAndProps();
   addMastersStyles();
-  renderLeaderboard(picks, liveScores);
+  renderLeaderboard(picks, scoresData);
 }
 
 window.onload = init;
