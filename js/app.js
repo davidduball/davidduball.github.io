@@ -161,6 +161,13 @@ function calculateTotalPropScore(picks, liveScores) {
   }, 0);
 }
 
+// NEW FUNCTION: Calculate adjusted score with props subtracted
+function calculateAdjustedScore(picks, liveScores) {
+  const relativeScore = calculateRelativeScore(picks, liveScores);
+  const propScore = calculateTotalPropScore(picks, liveScores);
+  return relativeScore - propScore; // Subtract prop points from relative score
+}
+
 function formatRelativeScore(score) {
   if (score === null || score === undefined || isNaN(score)) return '';
   if (score === 0) return 'E';
@@ -176,7 +183,7 @@ function renderLeaderboard(entries, liveScores) {
   mastersHeader.className = 'masters-header';
   mastersHeader.innerHTML = `
     <h2>2025 Masters Pool</h2>
-    <p>Scoring based on each team's top 6 players</p>
+    <p>Scoring based on each team's top 6 players (props subtracted)</p>
   `;
   container.appendChild(mastersHeader);
 
@@ -185,13 +192,13 @@ function renderLeaderboard(entries, liveScores) {
   propsLink.innerHTML = `<a href="props.html" style="color:#006400;font-weight:bold;text-decoration:none;">View Prop Picks</a>`;
   container.appendChild(propsLink);
   
-  // FIXED: Sort entries primarily by relative score first, then by total strokes if tied
+  // UPDATED: Sort entries primarily by adjusted score (relative score - prop points)
   entries.sort((a, b) => {
-    const scoreA = calculateRelativeScore(a.picks, liveScores);
-    const scoreB = calculateRelativeScore(b.picks, liveScores);
+    const scoreA = calculateAdjustedScore(a.picks, liveScores);
+    const scoreB = calculateAdjustedScore(b.picks, liveScores);
     
     if (scoreA === scoreB) {
-      // If relative scores are equal, use total strokes as tie-breaker
+      // If adjusted scores are equal, use total strokes as tie-breaker
       return calculateTotalStrokes(a.picks, liveScores) - calculateTotalStrokes(b.picks, liveScores);
     }
     
@@ -211,9 +218,10 @@ function renderLeaderboard(entries, liveScores) {
       <tr class="header-row">
         <th class="pos-column">POS</th>
         <th class="player-column">TEAM</th>
-        <th class="score-column">SCORE</th>
-        <th class="total-column">TOTAL</th>
+        <th class="score-column">GOLF</th>
         <th class="props-column">PROPS</th>
+        <th class="adjusted-column">NET</th>
+        <th class="total-column">TOTAL</th>
         <th class="round-column">R1</th>
         <th class="round-column">R2</th>
         <th class="round-column">R3</th>
@@ -231,6 +239,8 @@ function renderLeaderboard(entries, liveScores) {
     const relativeScore = calculateRelativeScore(entry.picks, liveScores);
     const formattedRelative = formatRelativeScore(relativeScore);
     const propScore = calculateTotalPropScore(entry.picks, liveScores);
+    const adjustedScore = calculateAdjustedScore(entry.picks, liveScores);
+    const formattedAdjusted = formatRelativeScore(adjustedScore);
     
     // Team header row (collapsible)
     const teamRow = document.createElement('tr');
@@ -244,8 +254,9 @@ function renderLeaderboard(entries, liveScores) {
         </div>
       </td>
       <td class="score-column">${formattedRelative}</td>
-      <td class="total-column">${totalStrokes}</td>
       <td class="props-column">${propScore}</td>
+      <td class="adjusted-column">${formattedAdjusted}</td>
+      <td class="total-column">${totalStrokes}</td>
       <td class="round-column"></td>
       <td class="round-column"></td>
       <td class="round-column"></td>
@@ -260,7 +271,7 @@ function renderLeaderboard(entries, liveScores) {
     golfersContainer.style.display = 'none';
     
     const golfersCell = document.createElement('td');
-    golfersCell.colSpan = 9; // Covers all 9 columns
+    golfersCell.colSpan = 10; // Updated to cover all 10 columns
     
     const golfersTable = document.createElement('table');
     golfersTable.className = 'golfers-table';
@@ -272,8 +283,8 @@ function renderLeaderboard(entries, liveScores) {
       <th class="pos-column">POS</th>
       <th class="player-column">PLAYER</th>
       <th class="score-column">SCORE</th>
-      <th class="total-column">TOTAL</th>
       <th class="props-column">PROPS</th>
+      <th class="total-column">TOTAL</th>
       <th class="round-column">R1</th>
       <th class="round-column">R2</th>
       <th class="round-column">R3</th>
@@ -314,8 +325,8 @@ function renderLeaderboard(entries, liveScores) {
           </div>
         </td>
         <td class="score-column">${data.scoreDisplay}</td>
-        <td class="total-column">${data.totalDisplay}</td>
         <td class="props-column">${data.propScore}</td>
+        <td class="total-column">${data.totalDisplay}</td>
         <td class="round-column">${data.r1Display}</td>
         <td class="round-column">${data.r2Display}</td>
         <td class="round-column">${data.r3Display}</td>
@@ -434,6 +445,11 @@ function addMastersStyles() {
     
     td.props-column {
       font-weight: normal;
+      color: #006400;
+    }
+    
+    .adjusted-column {
+      font-weight: bold;
       color: #006400;
     }
     
