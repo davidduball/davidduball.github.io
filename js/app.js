@@ -457,6 +457,11 @@ function addMastersStyles() {
       color: #006400;
     }
     
+    /* Make sure header text is white */
+    .header-row th {
+      color: white !important;
+    }
+    
     .golfer-strokes-column {
       font-weight: normal;
     }
