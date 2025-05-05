@@ -233,14 +233,10 @@ function renderLeaderboard(entries, scoresData) {
       <tr class="header-row">
         <th class="pos-column">POS</th>
         <th class="player-column">TEAM</th>
-        <th class="score-column">TEAM SCORE</th>
+        <th class="score-column">GOLFER SCORE</th>
         <th class="props-column">PROPS</th>
         <th class="adjusted-column">NET</th>
         <th class="total-column">TOTAL</th>
-        <th class="round-column">R1</th>
-        <th class="round-column">R2</th>
-        <th class="round-column">R3</th>
-        <th class="round-column">R4</th>
       </tr>
     </thead>
   `;
@@ -299,6 +295,10 @@ function renderLeaderboard(entries, scoresData) {
       <th class="player-column">PLAYER</th>
       <th class="score-column">SCORE</th>
       <th class="total-column">TOTAL</th>
+      <th class="round-column">R1</th>
+      <th class="round-column">R2</th>
+      <th class="round-column">R3</th>
+      <th class="round-column">R4</th>
     `;
     golfersTable.appendChild(golfersHeader);
     
