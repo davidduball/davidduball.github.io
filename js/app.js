@@ -4,7 +4,7 @@ async function fetchPicks() {
 }
 
 async function fetchLiveScoresAndProps() {
-  const res = await fetch("https://script.google.com/macros/s/AKfycbw7e11zGyZ-kOAvjuQXjQgO2Tc2rAiKEU8Gl31FpMGCTbocK4iqd53PFC4U19_5LOkW/exec");
+  const res = await fetch("https://script.google.com/macros/s/AKfycbwLuqDCLz4M46VctwBXJvuFPFazwmK-PJva092vDa0fptnnyRoMKXgfSuqT5sxJRlEAZQ/exec");
   const data = await res.json();
   
   // Create an object to store both golfer scores and team prop scores
